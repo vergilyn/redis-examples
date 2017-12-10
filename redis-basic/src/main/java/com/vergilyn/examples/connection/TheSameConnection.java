@@ -57,7 +57,7 @@ public class TheSameConnection{
                     // 当每个线程拥有自己的connection时, 不会出现数据混乱.
                     /*
                     Jedis own = JedisUtils.getJedis();
-                    String hget = own.hget(key, index);
+                    hget = own.hget(key, index);
                     */
 
                     if(!hget.equals(index)){ // 如果打印了下面

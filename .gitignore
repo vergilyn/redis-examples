@@ -55,3 +55,4 @@ Temporary Items
 *.iml
 /.idea/
 /redis-examples.iml
+/redis-basic/redis-basic.iml
