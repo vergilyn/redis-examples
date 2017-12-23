@@ -35,7 +35,6 @@ public class LockPubSub extends PublishSubscribe<RedissonLockEntry> {
     @Override
     protected void onMessage(RedissonLockEntry value, Long message) {
         if (message.equals(unlockMessage)) {
-            // 猜测:  -> new Semaphore(0).release(); permits = 0 - 1 = -1;
             value.getLatch().release();
 
             while (true) {
@@ -43,10 +42,10 @@ public class LockPubSub extends PublishSubscribe<RedissonLockEntry> {
                 synchronized (value) {
                     Runnable runnable = value.getListeners().poll();
                     if (runnable != null) {
-                        if (value.getLatch().tryAcquire()) { // -> Semaphore.tryAcquire(): -1 + 1 = 0, tryAcquire() = true
+                        if (value.getLatch().tryAcquire()) {
                             runnableToExecute = runnable;
                         } else {
-                            value.addListener(runnable); // 未成功执行, 则需要重新添加回listeners.
+                            value.addListener(runnable);
                         }
                     }
                 }
