@@ -82,7 +82,7 @@ abstract class PublishSubscribe<E extends PubSubEntry<E>> {
                 return semaphore.remove(listenerHolder.get());
             }
         };
-
+        //TODO vergilyn: 等理解semaphore、CountDownLatch再回来理解
         Runnable listener = new Runnable() {
 
             @Override
