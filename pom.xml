@@ -13,6 +13,7 @@
         <module>redisson-examples</module>
         <module>redisson-offical-examples</module>
         <module>redisson-source</module>
+        <module>redisson-associate</module>
     </modules>
 
     <repositories>
