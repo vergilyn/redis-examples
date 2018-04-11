@@ -88,6 +88,11 @@
             <artifactId>slf4j-simple</artifactId>
             <version>1.7.16</version>
         </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>24.1-jre</version>
+        </dependency>
 
         <dependency>
             <groupId>junit</groupId>
