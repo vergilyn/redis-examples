@@ -7,7 +7,7 @@ redisson-documentation: https://github.com/redisson/redisson/wiki
 2. redisson-associate: redisson源码中运用的一些相关知识;  
 3. redisson-examples: 个人对redisson学习的examples-code;  
 4. redisson-offical-examples: redisson官方给出的一些简单examples;  
-5. redisson-source: redisson-3.5.6源码, 学习时写理解备注;
+5. redisson-source: redisson-3.5.6源码, 学习时写理解备注; **工程有错误，部分依赖未引入**
 
 #### 主要阅读的源码
 1. org.redisson.RedissonFairLock

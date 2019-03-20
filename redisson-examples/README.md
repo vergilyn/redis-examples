@@ -1,5 +1,2 @@
-# redisson examples
-
-### RedissonClient Config
-[配置方法](https://github.com/redisson/redisson/wiki/2.-配置方法)  
-[第三方框架整合](https://github.com/redisson/redisson/wiki/14.-第三方框架整合)
+redisson-client config可通过JSON、YAML和Spring XML文件配置, 详见:  
+[https://github.com/redisson/redisson/wiki/2.-Configuration](https://github.com/redisson/redisson/wiki/2.-配置方法)
