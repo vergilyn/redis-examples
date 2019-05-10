@@ -10,12 +10,14 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * spring-boot-2.1.2.RELEASE默认使用的是lettuce。
  * <a href="https://docs.spring.io/spring-boot/docs/2.1.2.RELEASE/reference/htmlsingle/#howto-use-jedis-instead-of-lettuce">91.4 Use Jedis Instead of Lettuce<a/>
  */
 @Configuration
+@EnableTransactionManagement
 public class RedisConfiguration<K, V> {
 
     /**
@@ -34,7 +36,7 @@ public class RedisConfiguration<K, V> {
         return new StringRedisSerializer();
     }
 
-    @Bean
+    // @Bean
     public FastJsonRedisSerializer<K> fastJsonRedisSerializer(){
         Class clazz = (Class) ((ParameterizedType) RedisConfiguration.class.getGenericSuperclass()).getActualTypeArguments()[0];
         return new FastJsonRedisSerializer<K>(clazz);
@@ -42,7 +44,9 @@ public class RedisConfiguration<K, V> {
 
     @Bean
     public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory redisConnectionFactory){
-        return new StringRedisTemplate(redisConnectionFactory);
+        StringRedisTemplate stringRedisTemplate = new StringRedisTemplate(redisConnectionFactory);
+        stringRedisTemplate.setEnableTransactionSupport(true); // spring-data-redis默认禁用事务支持
+        return stringRedisTemplate;
     }
 
     @Bean

@@ -10,6 +10,12 @@
 - FastJsonRedisSerializer
 - StringRedisSerializer
 
+3. redis集群
+
+4. 多个redis实例，比如都是`127.0.0.1:6379`。但是业务1保存在database=1，业务2保存在database=2。
+
+5. spring-cloud-gateway中，默认的限流是基于redis，即`spring.redis.*`。如果跟业务的redis区分，不同的redis-host或database。
+
 ## spring-boot集成redis
 
 - [springboot之使用RedisTemplate优雅地操作redis](https://www.cnblogs.com/superfj/p/9232482.html)

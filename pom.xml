@@ -52,6 +52,11 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+        </dependency>
+
         <!-- redisson: jdk8+ -->
         <dependency>
             <groupId>org.redisson</groupId>
