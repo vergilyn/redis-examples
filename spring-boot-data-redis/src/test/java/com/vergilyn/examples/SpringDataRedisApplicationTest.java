@@ -39,8 +39,8 @@ import org.springframework.test.context.junit4.SpringRunner;
  * @date 2019-05-10
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = SpringBootRedisApplication.class)
-public class SpringBootRedisApplicationTest {
+@SpringBootTest(classes = SpringDataRedisApplication.class)
+public class SpringDataRedisApplicationTest {
     @Autowired
     private StringRedisTemplate redisTemplate;
 

@@ -11,6 +11,8 @@ spring:
         max-active: 200
         max-idle: 20
         max-wait: -1ms
+        min-idle: 0
+      shutdown-timeout:
 
 
 
