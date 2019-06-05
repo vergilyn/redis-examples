@@ -4,15 +4,19 @@ import java.util.List;
 
 import com.alibaba.fastjson.JSON;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisOperations;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
 /**
  * 1. spring-data-redis默认禁用事务支持。<a href="https://docs.spring.io/spring-data/redis/docs/2.1.6.RELEASE/reference/html/#tx.spring">@Transactional Support</a>
@@ -38,25 +42,28 @@ import org.springframework.test.context.junit4.SpringRunner;
  * @author VergiLyn
  * @date 2019-05-10
  */
-@RunWith(SpringRunner.class)
+// @RunWith(SpringRunner.class)
 @SpringBootTest(classes = SpringDataRedisApplication.class)
-public class SpringDataRedisApplicationTest {
+@Slf4j
+public class SpringDataRedisApplicationTest extends AbstractTestNGSpringContextTests {
     @Autowired
-    private StringRedisTemplate redisTemplate;
+    private StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    private RedisTemplate<Object, Object> redisTemplate;
 
     @Test
     public void tx1(){
         String key = "tx1";
-        // redisTemplate 无法保证在同一个connection中执行所有命令。
-        redisTemplate.multi();
+        // stringRedisTemplate 无法保证在同一个connection中执行所有命令。
+        stringRedisTemplate.multi();
 
-        redisTemplate.boundValueOps(key).set("1");
+        stringRedisTemplate.boundValueOps(key).set("1");
 
-        redisTemplate.boundHashOps(key).get(key);  // throw RedisCommandExecutionException: WRONGTYPE Operation against a key holding the wrong kind of value
+      //  stringRedisTemplate.boundHashOps(key).get(key);  // throw RedisCommandExecutionException: WRONGTYPE Operation against a key holding the wrong kind of value
 
-        redisTemplate.boundValueOps(key).set("2");
+        stringRedisTemplate.boundValueOps(key).set("2");
 
-        List<Object> exec = redisTemplate.exec();
+        List<Object> exec = stringRedisTemplate.exec();
 
         System.out.println(JSON.toJSONString(exec));
     }
@@ -65,7 +72,7 @@ public class SpringDataRedisApplicationTest {
     public void tx2(){
         String key = "tx2";
         // 保证在同一个connection中执行所有命令。
-        List<Object> txResults = redisTemplate.execute(new SessionCallback<List<Object>>() {
+        List<Object> txResults = stringRedisTemplate.execute(new SessionCallback<List<Object>>() {
 
             public List<Object> execute(RedisOperations redisOperations) throws DataAccessException {
                 redisOperations.multi();
@@ -82,4 +89,39 @@ public class SpringDataRedisApplicationTest {
         System.out.println(JSON.toJSONString(txResults));
     }
 
+    @Test(dataProvider = "pipelineData", threadPoolSize = 2, invocationCount = 1)
+    public void concurrentPipeline(String key, Long sleep){
+        requestPipeline(key, sleep);
+    }
+
+    @Test
+    public void pipeline(){
+        requestPipeline("incr", null);
+    }
+
+    private void requestPipeline(String key, Long sleep){
+        List<Object> list = stringRedisTemplate.executePipelined((RedisCallback<Object>) connection -> {
+            int num = 0;
+            while (num++ < 5) {
+                connection.incr(key.getBytes());
+
+                if (sleep != null && sleep > 0L){
+                    try {
+                        Thread.sleep(1000);
+                    } catch (Exception e) {
+
+                    }
+                }
+            }
+            return null;
+        });
+
+        log.info("Thread-ID: {}, key: {}, result: {} \r\n",
+                Thread.currentThread().getId(), key, StringUtils.join(list, ","));
+    }
+
+    @DataProvider(name = "pipelineData", parallel = true)
+    private Object[][] pipelineData(){
+        return new Object[][]{{"incr1", 1000L}, {"incr2", 1000L}};
+    }
 }

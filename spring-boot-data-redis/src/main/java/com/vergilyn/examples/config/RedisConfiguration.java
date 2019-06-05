@@ -67,7 +67,7 @@ public class RedisConfiguration<K, V> {
         redisTemplate.setConnectionFactory(redisConnectionFactory);
 
         // redisTemplate.setDefaultSerializer(redisSerializer);
-        // redisTemplate.setKeySerializer(redisSerializer);
+        // redisTemplate.setKeySerializer(RedisSerializer.string());
         // redisTemplate.setValueSerializer(redisSerializer);
         // redisTemplate.setXxxSerializer();
 
