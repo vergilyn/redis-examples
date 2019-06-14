@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>spring-boot-data-redis</artifactId>
+    <artifactId>springboot-redis-examples</artifactId>
 
     <dependencies>
         <dependency>

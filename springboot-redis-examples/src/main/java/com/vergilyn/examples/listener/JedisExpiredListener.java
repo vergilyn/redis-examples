@@ -9,7 +9,7 @@ import redis.clients.jedis.JedisPubSub;
  * @author VergiLyn
  * @date 2019-05-23
  */
-// @Component //
+//@Component
 public class JedisExpiredListener extends JedisPubSub {
 
     public final static String LISTENER_PATTERN = "__keyevent@*__:expired";

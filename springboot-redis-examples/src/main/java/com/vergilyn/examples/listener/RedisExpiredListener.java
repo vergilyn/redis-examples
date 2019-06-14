@@ -2,7 +2,6 @@ package com.vergilyn.examples.listener;
 
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
-import org.springframework.stereotype.Component;
 
 /**
  *  key过期事件推送到topic中只有key，无value，因为一旦过期，value就不存在了。
@@ -15,7 +14,7 @@ import org.springframework.stereotype.Component;
  * @author VergiLyn
  * @date 2019-05-23
  */
-@Component
+//@Component
 public class RedisExpiredListener implements MessageListener {
     public final static String LISTENER_PATTERN = "__key*__:*";//"__key*__:*";
 

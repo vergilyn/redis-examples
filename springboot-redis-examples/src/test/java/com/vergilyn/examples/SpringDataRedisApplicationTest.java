@@ -5,17 +5,14 @@ import java.util.List;
 import com.alibaba.fastjson.JSON;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
@@ -89,39 +86,4 @@ public class SpringDataRedisApplicationTest extends AbstractTestNGSpringContextT
         System.out.println(JSON.toJSONString(txResults));
     }
 
-    @Test(dataProvider = "pipelineData", threadPoolSize = 2, invocationCount = 1)
-    public void concurrentPipeline(String key, Long sleep){
-        requestPipeline(key, sleep);
-    }
-
-    @Test
-    public void pipeline(){
-        requestPipeline("incr", null);
-    }
-
-    private void requestPipeline(String key, Long sleep){
-        List<Object> list = stringRedisTemplate.executePipelined((RedisCallback<Object>) connection -> {
-            int num = 0;
-            while (num++ < 5) {
-                connection.incr(key.getBytes());
-
-                if (sleep != null && sleep > 0L){
-                    try {
-                        Thread.sleep(1000);
-                    } catch (Exception e) {
-
-                    }
-                }
-            }
-            return null;
-        });
-
-        log.info("Thread-ID: {}, key: {}, result: {} \r\n",
-                Thread.currentThread().getId(), key, StringUtils.join(list, ","));
-    }
-
-    @DataProvider(name = "pipelineData", parallel = true)
-    private Object[][] pipelineData(){
-        return new Object[][]{{"incr1", 1000L}, {"incr2", 1000L}};
-    }
 }

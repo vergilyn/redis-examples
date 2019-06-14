@@ -13,7 +13,7 @@
         <module>redisson-examples</module>
         <module>redisson-official-examples</module>
         <module>redisson-associate</module>
-        <module>spring-boot-data-redis</module>
+        <module>springboot-redis-examples</module>
     </modules>
 
     <repositories>
