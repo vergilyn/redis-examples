@@ -6,6 +6,13 @@ package com.vergilyn.examples;
  */
 public class TypeBitTest {
     public static void main(String[] args) {
+        int it = 11;
+
+        System.out.println(Integer.toString(it).length());
+
+    }
+
+    private static void typeBit(){
         System.out.println ("Byte-->>" + "字节数：" + Byte.BYTES + ";位数：" + Byte.SIZE + "; 最小值-->最大值:" + Byte.MIN_VALUE + "-->" + Byte.MAX_VALUE);
         System.out.println ("Short-->>" + "字节数：" + Short.BYTES + ";位数：" + Short.SIZE + "; 最小值-->最大值:" + Short.MIN_VALUE + "-->" + Short.MAX_VALUE);
         System.out.println ("Integer-->>" + "字节数：" + Integer.BYTES + ";位数：" + Integer.SIZE + "; 最小值-->最大值:" + Integer.MIN_VALUE + "-->" + Integer.MAX_VALUE);
