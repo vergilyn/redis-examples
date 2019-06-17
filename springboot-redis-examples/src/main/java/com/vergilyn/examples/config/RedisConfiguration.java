@@ -66,6 +66,9 @@ public class RedisConfiguration<K, V> {
         RedisTemplate<K, V> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
 
+        // redisTemplate.setEnableTransactionSupport();
+        // redisTemplate.setExposeConnection();
+
         // redisTemplate.setDefaultSerializer(redisSerializer);
         // redisTemplate.setKeySerializer(RedisSerializer.string());
         // redisTemplate.setValueSerializer(redisSerializer);
