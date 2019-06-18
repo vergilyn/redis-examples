@@ -170,24 +170,4 @@ public class RedisPipelineTest extends AbstractTestNGSpringContextTests {
         return new Object[][]{{true}, {false}};
     }
 
-    private void requestPipeline(String key, Long sleep){
-        List<Object> list = stringRedisTemplate.executePipelined((RedisCallback<Object>) connection -> {
-            int num = 0;
-            while (num++ < 5) {
-                connection.incr(key.getBytes());
-
-                if (sleep != null && sleep > 0L){
-                    try {
-                        Thread.sleep(1000);
-                    } catch (Exception e) {
-
-                    }
-                }
-            }
-            return null;
-        });
-
-        log.info("Thread-ID: {}, key: {}, result: {} \r\n",
-                Thread.currentThread().getId(), key, StringUtils.join(list, ","));
-    }
 }
