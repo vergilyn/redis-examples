@@ -8,6 +8,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class SpringDataRedisApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(SpringDataRedisApplication.class, args);
+        SpringApplication application = new SpringApplication(SpringDataRedisApplication.class);
+        application.setAdditionalProfiles("datasource");
+        application.run(args);
     }
 }

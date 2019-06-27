@@ -6,13 +6,10 @@ import com.alibaba.fastjson.JSON;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SessionCallback;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
 
 /**
@@ -40,11 +37,9 @@ import org.testng.annotations.Test;
  * @date 2019-05-10
  */
 // @RunWith(SpringRunner.class)
-@SpringBootTest(classes = SpringDataRedisApplication.class)
 @Slf4j
-public class SpringDataRedisApplicationTest extends AbstractTestNGSpringContextTests {
-    @Autowired
-    private StringRedisTemplate stringRedisTemplate;
+public class SpringDataRedisApplicationTest extends BasicTestng{
+
     @Autowired
     private RedisTemplate<Object, Object> redisTemplate;
 

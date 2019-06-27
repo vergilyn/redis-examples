@@ -6,10 +6,6 @@ package com.vergilyn.examples;
  */
 public class TypeBitTest {
     public static void main(String[] args) {
-        int it = 11;
-
-        System.out.println(Integer.toString(it).length());
-
     }
 
     private static void typeBit(){

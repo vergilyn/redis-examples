@@ -10,19 +10,15 @@ import io.lettuce.core.RedisFuture;
 import io.lettuce.core.cluster.api.async.RedisClusterAsyncCommands;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.StringRedisConnection;
 import org.springframework.data.redis.connection.lettuce.LettuceConnection;
 import org.springframework.data.redis.core.RedisCallback;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Pipeline;
 import redis.clients.util.RedisOutputStream;
 
@@ -32,12 +28,7 @@ import redis.clients.util.RedisOutputStream;
  */
 @SpringBootTest(classes = SpringDataRedisApplication.class)
 @Slf4j
-public class RedisPipelineTest extends AbstractTestNGSpringContextTests {
-    @Autowired
-    private StringRedisTemplate stringRedisTemplate;
-    @Autowired
-    private JedisPool jedisPool;
-
+public class RedisPipelineTest extends BasicTestng {
     /**
      * `get jedis`  --RESP--> `*2\r\n$3\r\nget\r\n$5\r\njedis\r\n`, len=24;
      * jedis-pipeline的client-output-buffer限制：8192 (这个数字也是有意义的，未去了解)。8192 / 24 ≈ 341 条命令为一个数据包。
