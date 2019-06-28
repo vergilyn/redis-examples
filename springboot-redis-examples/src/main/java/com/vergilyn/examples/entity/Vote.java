@@ -27,12 +27,12 @@ public class Vote extends AbstractEntity {
     private Date beginTime;
 
     @Column(nullable = false)
-    private Date entTime;
+    private Date endTime;
 
-    public Vote(Long id, String title, Date beginTime, Date entTime) {
+    public Vote(Long id, String title, Date beginTime, Date endTime) {
         super(id);
         this.title = title;
         this.beginTime = beginTime;
-        this.entTime = entTime;
+        this.endTime = endTime;
     }
 }

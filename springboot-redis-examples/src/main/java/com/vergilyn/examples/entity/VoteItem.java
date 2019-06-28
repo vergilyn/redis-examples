@@ -24,4 +24,7 @@ public class VoteItem extends AbstractEntity {
 
     @Column(nullable = false)
     private int count = 0;
+
+    @Column(nullable = true)
+    private String type;
 }

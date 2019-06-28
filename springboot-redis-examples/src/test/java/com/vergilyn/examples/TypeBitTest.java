@@ -1,11 +1,21 @@
 package com.vergilyn.examples;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 /**
  * @author VergiLyn
  * @date 2019-06-03
  */
 public class TypeBitTest {
     public static void main(String[] args) {
+        integerToInt();
+    }
+
+    private static void integerToInt(){
+        Integer[] integers = {1, 2, 3, null, 4, 5, null, 6};
+
+
+        System.out.println(ArrayUtils.toPrimitive(integers));
     }
 
     private static void typeBit(){

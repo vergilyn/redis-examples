@@ -112,7 +112,7 @@ public class VoteCache {
 
     public void adjustCountExpire(Vote vote){
         String key = keyCount(vote);
-        long expire = DateUtils.addDays(vote.getEntTime(), 10).getTime();
+        long expire = DateUtils.addDays(vote.getEndTime(), 10).getTime();
 
         // （暂用）lua不一定是很好的减少redis连接的方式。
         //  ARGV[1] = "expire-timestamp", ARGV[2] = timestamp
