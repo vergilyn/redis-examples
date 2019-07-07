@@ -10,7 +10,7 @@ import redis.clients.jedis.JedisPool;
  * @author VergiLyn
  * @date 2019-06-24
  */
-@SpringBootTest(classes = SpringDataRedisApplication.class, properties = {"spring.profiles.active=datasource"})
+@SpringBootTest(classes = SpringDataRedisApplication.class)
 public class BasicTestng extends AbstractTestNGSpringContextTests {
     @Autowired
     protected StringRedisTemplate stringRedisTemplate;

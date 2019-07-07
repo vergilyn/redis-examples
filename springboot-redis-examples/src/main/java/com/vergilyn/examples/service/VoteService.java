@@ -11,4 +11,5 @@ import com.vergilyn.examples.entity.Vote;
 public interface VoteService {
 
     Vote saveOrUpdate(Long id, String title, Date beginTime, Date endTime);
+
 }
