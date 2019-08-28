@@ -1,21 +1,95 @@
 package com.vergilyn.examples;
 
+import java.time.LocalDate;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import com.google.common.primitives.Ints;
+import com.vergilyn.examples.entity.Vote;
+
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.springframework.data.redis.core.script.DigestUtils;
+import org.testng.collections.Lists;
 
 /**
  * @author VergiLyn
  * @date 2019-06-03
  */
 public class TypeBitTest {
-    public static void main(String[] args) {
-        integerToInt();
+    public static void main(String[] args) throws Exception {
+        System.out.println(args);
+        Function xxx = new Function<String, Long, Integer, String>() {
+            @Override
+            public String get(String s, Long l, Integer i) {
+                return null;
+            }
+        };
+
+    }
+
+    private static void group(){
+        List<Vote> list = Lists.newArrayList();
+        list.add(new Vote(1L));
+        list.add(new Vote(2L));
+        list.add(new Vote(3L));
+        list.add(new Vote(4L));
+
+        Map<Long, Vote> collect = list.stream()
+                .collect(Collectors.toMap(Vote::getId, vote -> vote, (o, o2) -> o));
+    }
+
+    private static void compare(){
+        Long a = 256L;
+        Long b = 256L;
+        Long c = 300L;
+        // null 异常
+        System.out.println("a.compareTo(b) >>>> " + a.compareTo(b));  // 0
+        System.out.println("a.compareTo(c) >>>> " + a.compareTo(c));  // -1
+        System.out.println("c.compareTo(a >>>> " + c.compareTo(a));  // 1
+    }
+
+    private static void toInt(){
+        String str = "1234a";
+        System.out.println(NumberUtils.toInt(str));  // 0，解析异常默认返回0
+
+        // decode, 01234 = 668 ，0x1234 = 4660 多进制
+        System.out.println(Integer.decode("0x1234"));  // NumberFormatException
+
+        System.out.println(Integer.valueOf(str));  // NumberFormatException
+
+        System.out.println(Ints.stringConverter().convert(str));  // NumberFormatException
+    }
+
+    private static void date() throws Exception {
+        LocalDate date1 = LocalDate.of(2019, 7, 2);
+        LocalDate date2 = LocalDate.of(2019, 7, 3);
+
+        System.out.println(date1.isBefore(date2));
+        System.out.println(date1.isAfter(date2));
+
+        Date begin = new Date();
+        Thread.sleep(1000);
+        Date end = new Date();
+
+        System.out.println(begin.before(end));
+        System.out.println(begin.after(end));
     }
 
     private static void integerToInt(){
         Integer[] integers = {1, 2, 3, null, 4, 5, null, 6};
 
-
         System.out.println(ArrayUtils.toPrimitive(integers));
+    }
+
+    private static void sha1(){
+        String xx = "return redis.call('incr', 'incr');";
+        String redis = DigestUtils.sha1DigestAsHex(xx);
+        String apache = org.apache.commons.codec.digest.DigestUtils.sha1Hex(xx);
+        System.out.println(redis);
+        System.out.println(apache);
     }
 
     private static void typeBit(){
@@ -33,5 +107,11 @@ public class TypeBitTest {
            JVM规范中，boolean变量当作int处理，也就是4个字节；
            而boolean数组当作byte数组处理，即boolean类型的数组里面的每一个元素占1个字节。
          */
+    }
+
+
+    @FunctionalInterface
+    interface Function<A, B, C, R>{
+        R get(A a, B b, C c);
     }
 }

@@ -19,6 +19,10 @@ public class Vote extends AbstractEntity {
     private Date beginTime;
     private Date endTime;
 
+    public Vote(Long id) {
+        super(id);
+    }
+
     public Vote(Long id, String title, Date beginTime, Date endTime) {
         super(id);
         this.title = title;
