@@ -9,7 +9,6 @@ import javax.annotation.Resource;
 
 import com.vergilyn.examples.redisson.RedissonApplication;
 import com.vergilyn.examples.redisson.exception.RedissonException;
-import com.vergilyn.examples.redisson.template.AbstractLockMethod;
 import com.vergilyn.examples.redisson.template.client.FairLockClient;
 
 import org.junit.Test;
@@ -38,7 +37,6 @@ public class RedissonLockTest {
 		} finally {
 			rLock.unlock();
 		}
-
 
 
 		RLock rLock2 = fairLockClient.newInstance("test_100000080");
@@ -79,25 +77,22 @@ public class RedissonLockTest {
 		for (int i = 0; i < count; i++) {
 			new Thread(){
 				public void run(){
-					Object template = fairLockClient.tryTemplate("test", 100, 30, TimeUnit.SECONDS, new AbstractLockMethod() {
-						@Override
-						public Object execMethod() {
-							long index = Thread.currentThread().getId();
-					    	System.out.println(index + ": begin....");
+					Long template = fairLockClient.tryTemplate("test", 100, 30, TimeUnit.SECONDS, () -> {
+						long index = Thread.currentThread().getId();
+						System.out.println(index + ": begin....");
 
-					    	Semaphore semaphore = new Semaphore(0);
-							try {
-								semaphore.tryAcquire(5, TimeUnit.SECONDS);
-								System.out.println(index + ": end....");
-							} catch (InterruptedException e) {
-								e.printStackTrace();
-							} finally {
-								latch.countDown();
-							}
-							return index;
+						Semaphore semaphore = new Semaphore(0);
+						try {
+							semaphore.tryAcquire(5, TimeUnit.SECONDS);
+							System.out.println(index + ": end....");
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						} finally {
+							latch.countDown();
 						}
+						return index;
 					});
-					System.out.println((Long)template);
+					System.out.println(template);
 				}
 			}.start();
 		}

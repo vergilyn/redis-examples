@@ -8,7 +8,6 @@ import javax.annotation.Resource;
 
 import com.vergilyn.examples.redisson.annotation.RedissonLockAnno;
 import com.vergilyn.examples.redisson.annotation.RedissonLockKey;
-import com.vergilyn.examples.redisson.annotation.RedissonLockType;
 import com.vergilyn.examples.redisson.exception.RedissonException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -41,38 +40,50 @@ public class RedissonLockAOP {
                 return pjp.proceed();
             }
 
-            RedissonLockType type = anno.type();
+            RedissonLockAnno.LockType type = anno.type();
             String prefix = anno.prefix();
             long leaseTime = anno.leaseTime();
             long timeout = anno.waitTime();
             TimeUnit unit = anno.unit();
 
             if(StringUtils.isBlank(prefix)){
-                throw new RedissonException("参数错误: [prefix]不允许为empty!");
+                throw new RedissonException("parameter error: [prefix] don't allow null!");
             }
 
             String keySuffix = getKeySuffix(method, pjp.getArgs());
             String lockName = prefix + "_" + keySuffix;
 
-            if(RedissonLockType.FAIR_LOCK.equals(type)){
-                rLock = redissonClient.getFairLock(lockName);
-            }else {
-                rLock = redissonClient.getLock(lockName);
-            }
+            rLock = rLock(type, lockName);
 
             if(rLock.tryLock(timeout, leaseTime, unit)){
                 Object rs = pjp.proceed();
                 rLock.unlock();
                 return rs;
-            }else{
-                throw new RedissonException("获取锁失败, 可能原因: 等待获取锁超时, lock: " + lockName);
             }
+
+            throw new RedissonException("tryLock(...) method return: false.");
+
         } catch (Throwable throwable){
+            throw new RedissonException(throwable);
+        } finally {
+            /* remark:
+             *  isLock(), true -> 表示有线程持有锁
+             *  isHeldByCurrentThread(), true -> 表示当前线程持有锁
+             */
             if(rLock != null && rLock.isHeldByCurrentThread()){
                 rLock.unlock();
             }
-            throw new RedissonException(throwable);
         }
+    }
+
+    private RLock rLock(RedissonLockAnno.LockType lockType, String lockName){
+        RLock rLock;
+        switch (lockType){
+            case FAIR_LOCK: rLock = redissonClient.getFairLock(lockName); break;
+            default: rLock = redissonClient.getLock(lockName); break;
+        }
+
+        return rLock;
     }
 
     private String getKeySuffix(Method method, Object[] args) throws RedissonException{

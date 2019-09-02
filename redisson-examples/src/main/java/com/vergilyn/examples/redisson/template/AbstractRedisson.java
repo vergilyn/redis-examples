@@ -1,6 +1,7 @@
 package com.vergilyn.examples.redisson.template;
 
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 import com.vergilyn.examples.redisson.exception.RedissonException;
 
@@ -27,31 +28,33 @@ public abstract class AbstractRedisson {
 
     public abstract RLock newInstance(String lock);
 
-    public final Object tryTemplate(String lock, long waitTime, long leaseTime, TimeUnit unit, AbstractLockMethod method) {
-        Object rs;
+    public final <R> R tryTemplate(String lock, long waitTime, long leaseTime, TimeUnit unit, Supplier<R> method) {
         RLock rLock = null;
         try {
             rLock = newInstance(lock);
             boolean isLock = rLock.tryLock(waitTime, leaseTime, unit);
-            if (isLock) {
-                rs = method.execMethod();
-                rLock.unlock();
-            } else {
-                throw new RedissonException("获取锁失败, 可能原因: 等待获取锁超时, lock: " + lock);
+            if (!isLock) {
+                throw new RedissonException("Get RedissonLock Fail: " + lock);
             }
-            return rs;
-        } catch (InterruptedException e) {
+            R result = method.get();
+            rLock.unlock();
+
+            return result;
+        } catch (RedissonException | InterruptedException e) {
+            throw new RedissonException(e);
+        } catch (Exception e) {
+            throw e;
+        } finally {
             if (rLock != null && rLock.isHeldByCurrentThread()) {
                 rLock.unlock();
             }
-            throw new RedissonException(e);
         }
     }
 
-    public final Object template(String lock, long leaseTime, TimeUnit unit, AbstractLockMethod method) {
+    public final <R> R template(String lock, long leaseTime, TimeUnit unit, Supplier<R> method) {
         RLock rLock = newInstance(lock);
         rLock.lock(leaseTime, unit);
-        Object rs = method.execMethod();
+        R rs = method.get();
         rLock.unlock();
         return rs;
     }

@@ -8,8 +8,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.concurrent.TimeUnit;
 
-import com.vergilyn.examples.redisson.annotation.RedissonLockType;
-
 import org.redisson.RedissonLock;
 import org.redisson.config.Config;
 
@@ -18,7 +16,7 @@ import org.redisson.config.Config;
 @Documented
 public @interface RedissonLockAnno {
 
-    RedissonLockType type() default RedissonLockType.BASIC_LOCK;
+    LockType type() default LockType.BASIC_LOCK;
     /**
      * 锁对象名
      */
@@ -35,4 +33,8 @@ public @interface RedissonLockAnno {
     long leaseTime() default -1;
 
     TimeUnit unit() default TimeUnit.SECONDS;
+
+    enum LockType {
+        BASIC_LOCK, FAIR_LOCK
+    }
 }

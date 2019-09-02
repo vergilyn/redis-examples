@@ -54,3 +54,4 @@ Temporary Items
 .classpath
 *.iml
 /out/
+*Test.java
