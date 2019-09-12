@@ -1,0 +1,6 @@
+spring:
+  redis:
+    cluster:
+      max-redirects: 1
+      nodes:
+        - 127.0.0.1:6379

@@ -14,6 +14,7 @@
         <module>redisson-official-examples</module>
         <module>redisson-associate</module>
         <module>springboot-redis-examples</module>
+        <module>redis-cluster-examples</module>
     </modules>
 
     <repositories>
