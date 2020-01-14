@@ -28,7 +28,7 @@ import redis.clients.jedis.util.RedisOutputStream;
  */
 @SpringBootTest(classes = SpringDataRedisApplication.class)
 @Slf4j
-public class RedisPipelineTest extends BasicTestng {
+public class RedisPipelineTest extends AbstractTestng {
     /**
      * `get jedis`  --RESP--> `*2\r\n$3\r\nget\r\n$5\r\njedis\r\n`, len=24;
      * jedis-pipeline的client-output-buffer限制：8192 (这个数字也是有意义的，未去了解)。8192 / 24 ≈ 341 条命令为一个数据包。

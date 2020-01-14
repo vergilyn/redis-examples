@@ -19,7 +19,7 @@ import redis.clients.jedis.Jedis;
  * @author VergiLyn
  * @date 2019-06-24
  */
-public class VoteTest extends BasicTestng {
+public class VoteTest extends AbstractTestng {
     @Autowired
     private VoteService voteService;
     @Autowired

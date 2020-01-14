@@ -11,7 +11,7 @@ import redis.clients.jedis.JedisPool;
  * @date 2019-06-24
  */
 @SpringBootTest(classes = SpringDataRedisApplication.class)
-public class BasicTestng extends AbstractTestNGSpringContextTests {
+public abstract class AbstractTestng extends AbstractTestNGSpringContextTests {
     @Autowired
     protected StringRedisTemplate stringRedisTemplate;
     @Autowired

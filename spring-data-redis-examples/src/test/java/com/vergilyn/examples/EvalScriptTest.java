@@ -9,7 +9,7 @@ import redis.clients.jedis.Jedis;
  * @author VergiLyn
  * @date 2019-06-24
  */
-public class EvalScriptTest extends BasicTestng {
+public class EvalScriptTest extends AbstractTestng {
     private static final String script = "return redis.call('incr', 'incr')";
 
     @Test
@@ -17,7 +17,7 @@ public class EvalScriptTest extends BasicTestng {
         Jedis jedis = jedisPool.getResource();
 
         // Long eval = (Long) jedis.eval(script); // java.lang.String cannot be cast to java.lang.Long
-        String eval = (String) jedis.eval(script, 0);  // params 可以不传，但不能传null
+        Long eval = (Long) jedis.eval(script, 0);  // params 可以不传，但不能传null
         System.out.println(eval);
     }
 

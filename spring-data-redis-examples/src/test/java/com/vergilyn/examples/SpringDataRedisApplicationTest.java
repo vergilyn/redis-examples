@@ -38,7 +38,7 @@ import org.testng.annotations.Test;
  */
 // @RunWith(SpringRunner.class)
 @Slf4j
-public class SpringDataRedisApplicationTest extends BasicTestng{
+public class SpringDataRedisApplicationTest extends AbstractTestng {
 
     @Autowired
     private RedisTemplate<Object, Object> redisTemplate;
