@@ -1,36 +1,27 @@
-#### GitHub
-redisson: https://github.com/redisson/redisson  
-redisson-official-example: https://github.com/redisson/redisson-examples  
-redisson-documentation: https://github.com/redisson/redisson/wiki  
+# redis-examples
 
-1. redis-basic: redis的基础学习;  
-2. redisson-associate: redisson源码中运用的一些相关知识;  
-3. redisson-examples: 个人对redisson学习的examples-code;  
-4. redisson-official-examples: redisson官方给出的一些简单examples;  
-5. redisson-source: redisson-3.5.6源码, 学习时写理解备注; **工程有错误，部分依赖未引入**
+- [redis, Github](https://github.com/antirez/redis)
+- [redis.io](http://redis.io/)
+- [redis.cn](http://www.redis.cn/): 中文，相对文档较老。
 
-#### 主要阅读的源码
-1. org.redisson.RedissonFairLock
-2. org.redisson.RedissonLock
+- [redisson](https://github.com/redisson/redisson)
 
-#### 遗留问题
-1. jdk, AtomicReference: org.redisson.pubsub.PublishSubscribe.subscribe, 不理解用途.
+2020-01-14:
+1. redisson 迁移到 [Vergilyn Github, redisson-fork](https://github.com/vergilyn/redisson-fork)
 
-### 2019-05-09
-#### redis版本特性
+## 2019-05-09
+### redis版本特性
 Redis 版本控制：major.minor.patchlevel。偶数的版本号表示稳定的版本， 
 例如 1.2，2.0，2.2，2.4，2.6，2.8，奇数的版本号用来表示非标准版本,例如2.9.x是非稳定版本，它的稳定版本是3.0。
 
-Redis重大版本（2.6、2.8、3.0、3.2、4.0）
-https://www.cnblogs.com/xingzc/p/9546849.html
-Redis公布了5.0版本12项新特性 
-[图片]https://www.sohu.com/a/233717966_268033
+[Redis重大版本（2.6、2.8、3.0、3.2、4.0）](https://www.cnblogs.com/xingzc/p/9546849.html)
+[Redis公布了5.0版本12项新特性](https://www.sohu.com/a/233717966_268033)
 
-#### redis中的事务
+### redis中的事务
 
-- redis中的事务 https://www.cnblogs.com/huxinga/p/6502118.html
-- 英文 https://redis.io/topics/transactions
-- 中文 http://www.redis.cn/topics/transactions.html
+- [redis中的事务](https://www.cnblogs.com/huxinga/p/6502118.html)
+- [redis.io transactions](https://redis.io/topics/transactions)
+- [redis.cn transactions](http://www.redis.cn/topics/transactions.html)
 
 Redis 2.6.5+开始，服务器会对命令入队失败的情况进行记录，并在客户端调用 EXEC 命令时，拒绝执行并自动放弃这个事务。
 
