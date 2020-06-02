@@ -1,10 +1,8 @@
 package com.vergilyn.examples.config;
 
-import java.lang.reflect.ParameterizedType;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import com.alibaba.fastjson.support.spring.FastJsonRedisSerializer;
 import com.vergilyn.examples.listener.RedisExpiredListener;
 
 import org.springframework.context.annotation.Bean;
@@ -40,12 +38,6 @@ public class RedisConfiguration<K, V> {
     @Bean
     public StringRedisSerializer stringRedisSerializer(){
         return new StringRedisSerializer();
-    }
-
-    // @Bean
-    public FastJsonRedisSerializer<K> fastJsonRedisSerializer(){
-        Class clazz = (Class) ((ParameterizedType) RedisConfiguration.class.getGenericSuperclass()).getActualTypeArguments()[0];
-        return new FastJsonRedisSerializer<K>(clazz);
     }
 
     @Bean

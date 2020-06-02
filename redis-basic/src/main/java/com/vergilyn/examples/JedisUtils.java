@@ -54,14 +54,4 @@ public final class JedisUtils {
             return null;
         }
     }
-
-    /**
-     * 释放jedis资源
-     * @param jedis
-     */
-    public static void returnResource(final Jedis jedis) {
-        if (jedis != null) {
-            jedisPool.returnResource(jedis);
-        }
-    }
 }

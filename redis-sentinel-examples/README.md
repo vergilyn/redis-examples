@@ -13,6 +13,7 @@ sentinel failover-timeout mymaster 180000
 sentinel parallel-syncs mymaster 1
 ```
 
+启动后：
 ```
 # Example sentinel.conf
 # redis v3.2.13

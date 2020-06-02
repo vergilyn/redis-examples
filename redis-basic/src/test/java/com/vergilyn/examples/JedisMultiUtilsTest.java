@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -24,6 +24,9 @@ import redis.clients.jedis.Pipeline;
  */
 @RunWith(BlockJUnit4ClassRunner.class)
 public class JedisMultiUtilsTest {
+    // FIXME 2020-06-02
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     private static final String KEY_STRING = "STR:";
     private static final String KEY_HASH = "HASH:";
     private static final String KEY_LIST = "LIST:";
@@ -90,7 +93,7 @@ public class JedisMultiUtilsTest {
     }
 
     @Test
-    public void mgetSort(){
+    public void mgetSort() throws JsonProcessingException {
         Map<String, List<String>> allList = JedisMultiUtils.mgetSort(
                 new String[]{KEY_SORT + 1, KEY_SORT + 2, KEY_SORT + "X"},
                 0,
@@ -107,11 +110,12 @@ public class JedisMultiUtilsTest {
                         return xx;
                     }
                 });
-        System.out.println(JSON.toJSONString(allList, SerializerFeature.WriteNullStringAsEmpty));
+        // System.out.println(JSON.toJSONString(allList, SerializerFeature.WriteNullStringAsEmpty));
+        System.out.println(OBJECT_MAPPER.writeValueAsString(allList));
     }
 
     @Test
-    public void mgetSet(){
+    public void mgetSet() throws JsonProcessingException {
         Map<String, List<String>> allList = JedisMultiUtils.mgetSet(
                 new String[]{KEY_SET + 1, KEY_SET + 2, KEY_SET + "X"},
                 String.class,
@@ -126,11 +130,12 @@ public class JedisMultiUtilsTest {
                         return xx;
                     }
                 });
-        System.out.println(JSON.toJSONString(allList, SerializerFeature.WriteNullStringAsEmpty));
+        // System.out.println(JSON.toJSONString(allList, SerializerFeature.WriteNullStringAsEmpty));
+        System.out.println(OBJECT_MAPPER.writeValueAsString(allList));
     }
 
     @Test
-    public void mgetListLrange(){
+    public void mgetListLrange() throws JsonProcessingException {
         Map<String, List<String>> allList = JedisMultiUtils.mgetListLrange(
                 new String[]{KEY_LIST + 1, KEY_LIST + 2, KEY_LIST + "X"},
                 0,
@@ -147,12 +152,13 @@ public class JedisMultiUtilsTest {
                         return xx;
                     }
                 });
-        System.out.println(JSON.toJSONString(allList, SerializerFeature.WriteNullStringAsEmpty));
+        // System.out.println(JSON.toJSONString(allList, SerializerFeature.WriteNullStringAsEmpty));
+        System.out.println(OBJECT_MAPPER.writeValueAsString(allList));
     }
 
 
     @Test
-    public void mgetFieldsHash(){
+    public void mgetFieldsHash() throws JsonProcessingException {
         Map<String, Map<String, String>> allHash = JedisMultiUtils.mgetHash(
                 new String[]{KEY_HASH + 1, KEY_HASH + 2, KEY_HASH + "X"},
                 new String[]{"field-01", "field-03", "field-0x"},
@@ -166,11 +172,12 @@ public class JedisMultiUtilsTest {
                 return map;
             }
         });
-        System.out.println(JSON.toJSONString(allHash, SerializerFeature.WriteNullStringAsEmpty));
+        // System.out.println(JSON.toJSONString(allHash, SerializerFeature.WriteNullStringAsEmpty));
+        System.out.println(OBJECT_MAPPER.writeValueAsString(allHash));
     }
 
     @Test
-    public void mgetAllHash(){
+    public void mgetAllHash() throws JsonProcessingException {
         Map<String, Map<String, String>> allHash = JedisMultiUtils.mgetHash(new String[]{KEY_HASH + 1, KEY_HASH + 2, KEY_HASH + "X"}, null, new RedisMultiAbstract<Map<String, String>>() {
             @Override
             public Map<String, String> emptySet(String key) {
@@ -180,17 +187,20 @@ public class JedisMultiUtilsTest {
                 return map;
             }
         });
-        System.out.println(JSON.toJSONString(allHash, SerializerFeature.WriteNullStringAsEmpty));
+        // System.out.println(JSON.toJSONString(allHash, SerializerFeature.WriteNullStringAsEmpty));
+        System.out.println(OBJECT_MAPPER.writeValueAsString(allHash));
     }
 
     @Test
-    public void mgetString(){
+    public void mgetString() throws JsonProcessingException {
         Map<String, String> allHash = JedisMultiUtils.mgetString(new String[]{KEY_STRING + "1", KEY_STRING + "2", KEY_STRING + "X"}, String.class, new RedisMultiAbstract<String>() {
             @Override
             public String emptySet(String key) {
                 return "2333";
             }
         });
-        System.out.println(JSON.toJSONString(allHash, SerializerFeature.WriteNullStringAsEmpty));
+        // System.out.println(JSON.toJSONString(allHash, SerializerFeature.WriteNullStringAsEmpty));
+
+        System.out.println(OBJECT_MAPPER.writeValueAsString(allHash));
     }
 }

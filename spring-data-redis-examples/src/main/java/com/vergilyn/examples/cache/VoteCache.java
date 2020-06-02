@@ -3,7 +3,8 @@ package com.vergilyn.examples.cache;
 import java.util.Optional;
 import java.util.function.ToLongBiFunction;
 
-import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.vergilyn.examples.entity.Vote;
 import com.vergilyn.examples.entity.VoteItem;
@@ -15,6 +16,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
+
+import static com.vergilyn.examples.cache.CacheConstants.DEFAULT_INCR;
 
 /**
  * 常量命名：[key | field | value]_[true | false]_[string | hash | list | set | zset]。
@@ -75,11 +78,10 @@ public class VoteCache {
 
     private static final String V_F_ZSET_VOTE_EXPIRED_TIMESTAMP = "expired-timestamp";
 
-    public static final String SEPARATOR_CHAR = "_";
-    private static final int INCR = 1;
-
     @Autowired
     private StringRedisTemplate redisTemplate;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private String keyCount(Vote vote) {
         Assert.notNull(vote);
@@ -113,7 +115,7 @@ public class VoteCache {
         Assert.notNull(item);
         Assert.notNull(item.getId());
         Assert.notNull(item.getVoteId());
-        return item.getVoteId() + SEPARATOR_CHAR + item.getId();
+        return item.getVoteId() + CacheConstants.SEPARATOR_CHAR + item.getId();
     }
 
     /**
@@ -146,14 +148,19 @@ public class VoteCache {
 
         String kc = keyCount(item.getVoteId());
         String mc = memberCount(item);
-        String sc = item.getCount() + INCR + "";
+        String sc = item.getCount() + DEFAULT_INCR + "";
 
         String kt = keyTimestamp();
         String mt = memberTimestamp(item);
         String st = currentTimeMillis + "";
 
         String kl = keyLog();
-        String vl = JSON.toJSONString(log);
+        String vl = null;
+        try {
+            vl = objectMapper.writeValueAsString(log);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
 
         // KEYS[1] = kt, ARGV[1] = st, ARGV[2] = mt
         // KEYS[2] = kl, ARGV[3] = vl
@@ -170,7 +177,7 @@ public class VoteCache {
 
         return Optional.ofNullable(redisTemplate.execute(new DefaultRedisScript<Long>(script, Long.class),
                 Lists.newArrayList(kt, kl, kc),
-                st, mt, vl, mc, sc, INCR + "")).orElse(0L);
+                st, mt, vl, mc, sc, DEFAULT_INCR + "")).orElse(0L);
     }
 
     /**
@@ -203,7 +210,12 @@ public class VoteCache {
         String st = currentTimeMillis + "";
 
         String kl = keyLog();
-        String vl = JSON.toJSONString(log);
+        String vl = null;
+        try {
+            vl = objectMapper.writeValueAsString(log);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
 
         // KEYS[1] = kt, ARGV[1] = st, ARGV[2] = mt
         // KEYS[2] = kc, ARGV[3] = incr, ARGV[4] = mc, ARGV[6] = ec
@@ -219,7 +231,7 @@ public class VoteCache {
 
         Long execute = redisTemplate.execute(new DefaultRedisScript<>(script, Long.class),
                 Lists.newArrayList(kt, kc, kl),
-                st, mt, INCR + "", mc, vl);
+                st, mt, DEFAULT_INCR + "", mc, vl);
 
         if (execute == null || execute == -1) {
             long dbc = initCountFunction.applyAsLong(item, log);
@@ -240,7 +252,7 @@ public class VoteCache {
 
             execute = redisTemplate.execute(new DefaultRedisScript<>(script, Long.class),
                     Lists.newArrayList(kt, kc, kl),
-                    st, mt, mc, dbc + "", INCR + "", vl);
+                    st, mt, mc, dbc + "", DEFAULT_INCR + "", vl);
         }
 
         return execute == null ? 0 : execute;

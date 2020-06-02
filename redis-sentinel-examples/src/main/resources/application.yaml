@@ -1,4 +1,7 @@
 spring:
+  application:
+    name: redis-sentinel-application
+
   redis:
     sentinel:
       master: mymaster

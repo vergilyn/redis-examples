@@ -4,7 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -27,6 +28,8 @@ import redis.clients.jedis.Response;
  * @date 2018/3/11
  */
 public class JedisMultiUtils {
+    // FIXME 2020-06-02
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     /**
      *
@@ -260,7 +263,7 @@ public class JedisMultiUtils {
         }
     }
 
-    private static <T> T transResult(String val, Class<T> clazz){
+    private static <T> T transResult(String val, Class<T> clazz) throws JsonProcessingException {
         if(val == null || StringUtils.isBlank(val)){
             return null;
         }
@@ -282,7 +285,7 @@ public class JedisMultiUtils {
         }else if(Boolean.class.equals(clazz)){
             return (T) Boolean.valueOf(val);
         }else{
-            return JSON.parseObject(val, clazz);
+            return OBJECT_MAPPER.readValue(val, clazz);
         }
     }
 

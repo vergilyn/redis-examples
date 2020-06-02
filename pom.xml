@@ -9,10 +9,9 @@
     <version>1.0.0-SNAPSHOT</version>
     <modules>
         <module>redis-basic</module>
-        <module>redisson-examples</module>
-        <module>redisson-official-examples</module>
-        <module>spring-data-redis-examples</module>
         <module>redis-cluster-examples</module>
+        <module>redis-sentinel-examples</module>
+        <module>spring-data-redis-examples</module>
     </modules>
 
     <repositories>
@@ -31,20 +30,24 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
 
-        <spring-boot-dependencies.version>2.2.2.RELEASE</spring-boot-dependencies.version>
+        <spring-boot-dependencies.version>2.2.6.RELEASE</spring-boot-dependencies.version>
+        <redisson.version>3.12.0</redisson.version>
+        <lmax-disruptor.version>3.4.2</lmax-disruptor.version>
+
         <projectlombok.version>1.18.10</projectlombok.version>
         <google-guava.version>28.2-jre</google-guava.version>
-        <alibaba-fastjson.version>1.2.62</alibaba-fastjson.version>
+        <fasterxml-jackson.version>2.11.0</fasterxml-jackson.version>
+        <h2-database.version>1.4.200</h2-database.version>
+
         <apache-common-lang3.version>3.9</apache-common-lang3.version>
-
-        <redisson.version>3.12.0</redisson.version>
-
         <apache-common-io.version>2.6</apache-common-io.version>
         <apache-common-pool2.version>2.6.1</apache-common-pool2.version>
-        <lmax-disruptor.version>3.4.2</lmax-disruptor.version>
+        <apache-common-collections4.version>4.4</apache-common-collections4.version>
+        <commons-beanutils.version>1.9.3</commons-beanutils.version>
 
         <testng.version>7.1.0</testng.version>
         <junit.version>4.13</junit.version>
+        <junit-jupiter.version>5.6.0</junit-jupiter.version>
     </properties>
 
     <dependencyManagement>
@@ -57,11 +60,16 @@
                 <scope>import</scope>
             </dependency>
 
-            <!-- redisson: jdk8+ -->
             <dependency>
                 <groupId>org.redisson</groupId>
                 <artifactId>redisson</artifactId>
                 <version>${redisson.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.lmax</groupId>
+                <artifactId>disruptor</artifactId>
+                <version>${lmax-disruptor.version}</version>
             </dependency>
 
             <dependency>
@@ -77,9 +85,15 @@
             </dependency>
 
             <dependency>
-                <groupId>com.lmax</groupId>
-                <artifactId>disruptor</artifactId>
-                <version>${lmax-disruptor.version}</version>
+                <groupId>commons-beanutils</groupId>
+                <artifactId>commons-beanutils</artifactId>
+                <version>${commons-beanutils.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <version>${h2-database.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -89,7 +103,33 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${projectlombok.version}</version>
-            <scope>provided</scope>
+            <!--<scope>provided</scope>-->
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-logging</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${fasterxml-jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${fasterxml-jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${fasterxml-jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>${fasterxml-jackson.version}</version>
         </dependency>
 
         <!-- utils -->
@@ -104,29 +144,49 @@
             <version>${apache-common-lang3.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-            <version>${alibaba-fastjson.version}</version>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>${apache-common-collections4.version}</version>
         </dependency>
 
-        <!-- test -->
+        <!-- junit 5.x -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
             <scope>test</scope>
+            <version>${junit-jupiter.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+            <version>${junit-jupiter.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+            <scope>test</scope>
+            <version>${junit-jupiter.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-commons</artifactId>
+            <scope>test</scope>
+            <version>1.6.2</version>
+        </dependency>
+
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>${testng.version}</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
-        </dependency>
+        </dependency>-->
     </dependencies>
 
     <build>
