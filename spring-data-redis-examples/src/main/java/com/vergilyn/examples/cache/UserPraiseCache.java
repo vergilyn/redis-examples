@@ -8,13 +8,12 @@ import javax.annotation.Resource;
 import com.google.common.collect.Maps;
 
 import org.springframework.data.redis.core.HashOperations;
-import org.springframework.stereotype.Component;
 
 /**
  * FIXME 2020-06-01 缓存为永久缓存，注意清理
  * @date 2020-06-01
  */
-@Component
+// @Component
 public class UserPraiseCache {
     private static final Long ZERO_LONG = 0L;
 

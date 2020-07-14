@@ -14,7 +14,6 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
-import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 import static com.vergilyn.examples.cache.CacheConstants.DEFAULT_INCR;
@@ -38,7 +37,7 @@ import static com.vergilyn.examples.cache.CacheConstants.DEFAULT_INCR;
  * @author VergiLyn
  * @date 2019-06-26
  */
-@Component
+// @Component
 public class VoteCache {
 
     /**

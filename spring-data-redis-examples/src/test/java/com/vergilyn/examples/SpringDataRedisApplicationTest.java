@@ -58,6 +58,7 @@ public class SpringDataRedisApplicationTest extends AbstractTestng {
 
         stringRedisTemplate.boundValueOps(key).set("2");
 
+
         List<Object> exec = stringRedisTemplate.exec();
 
         System.out.println(objectMapper.writeValueAsString(exec));

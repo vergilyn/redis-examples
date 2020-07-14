@@ -7,13 +7,12 @@ import com.vergilyn.examples.entity.Vote;
 import com.vergilyn.examples.service.VoteService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * @author VergiLyn
  * @date 2019-06-26
  */
-@Service
+// @Service
 public class VoteServiceImpl implements VoteService {
 
     @Autowired
