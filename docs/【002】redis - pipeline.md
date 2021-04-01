@@ -69,15 +69,15 @@ blog中提到的`客户端会并不会调用read去读取socket里面的缓冲�
 
 ## 测试 pipeline 
 
-|   |    |
-|----|----|
-| os  | windows10 |
-| redis-server | 3.2.100 |
-| jedis | 2.9.3|
+|                   |               |
+|:------------------|:--------------|
+| os                | windows10     |
+| redis-server      | 3.2.100       |
+| jedis             | 2.9.3         |
 | spring-data-redis | 2.1.6.RELEASE |
-| ettuce | 5.1.6.RELEAS |
-| netty | 4.1.34.Final |
-| spring-boot | 2.1.4.RELEASE |
+| lettuce           | 5.1.6.RELEAS  |
+| netty             | 4.1.34.Final  |
+| spring-boot       | 2.1.4.RELEASE |
 
 
 ### jedis

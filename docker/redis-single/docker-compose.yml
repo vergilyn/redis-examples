@@ -1,0 +1,9 @@
+version: "3.9"
+services:
+  redisSingle:
+    image: redis:5.0.10
+    container_name: redis-5x-single
+    ports:
+      - 56379:6379
+#    volumes:
+#      - "D:/docker-volumes/redis-single/data/:/data/"
