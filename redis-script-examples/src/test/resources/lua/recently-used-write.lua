@@ -20,7 +20,9 @@ redis.call("ZADD", KEYS[1], unpack(score_members));
 
 local fixed_size = tonumber(ARGV[1]);
 --- O(log(N)): with N being the number of elements in the sorted set.
-local count = redis.call("ZCOUNT", KEYS[1], "-inf", "+inf");
+-- local count = redis.call("ZCOUNT", KEYS[1], "-inf", "+inf");
+--- O(1): 返回key的有序集元素个数。
+local count = redis.call("ZCARD", KEYS[1]);
 if (count > fixed_size) then
     --- 除有序集key中，指定排名(rank)区间内的所有成员。0: 分数最小的元素；-1: 分数最高的元素
     redis.call("ZREMRANGEBYRANK", KEYS[1], 0, count - fixed_size - 1);

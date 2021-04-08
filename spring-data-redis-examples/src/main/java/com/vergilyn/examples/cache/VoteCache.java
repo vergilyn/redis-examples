@@ -3,8 +3,7 @@ package com.vergilyn.examples.cache;
 import java.util.Optional;
 import java.util.function.ToLongBiFunction;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.vergilyn.examples.entity.Vote;
 import com.vergilyn.examples.entity.VoteItem;
@@ -79,8 +78,6 @@ public class VoteCache {
 
     @Autowired
     private StringRedisTemplate redisTemplate;
-    @Autowired
-    private ObjectMapper objectMapper;
 
     private String keyCount(Vote vote) {
         Assert.notNull(vote);
@@ -154,12 +151,7 @@ public class VoteCache {
         String st = currentTimeMillis + "";
 
         String kl = keyLog();
-        String vl = null;
-        try {
-            vl = objectMapper.writeValueAsString(log);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
+        String vl = JSON.toJSONString(log);
 
         // KEYS[1] = kt, ARGV[1] = st, ARGV[2] = mt
         // KEYS[2] = kl, ARGV[3] = vl
@@ -209,12 +201,7 @@ public class VoteCache {
         String st = currentTimeMillis + "";
 
         String kl = keyLog();
-        String vl = null;
-        try {
-            vl = objectMapper.writeValueAsString(log);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
+        String vl = JSON.toJSONString(log);
 
         // KEYS[1] = kt, ARGV[1] = st, ARGV[2] = mt
         // KEYS[2] = kc, ARGV[3] = incr, ARGV[4] = mc, ARGV[6] = ec

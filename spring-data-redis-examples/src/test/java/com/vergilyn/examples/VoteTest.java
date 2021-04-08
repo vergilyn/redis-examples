@@ -3,9 +3,8 @@ package com.vergilyn.examples;
 import java.util.Date;
 import java.util.List;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.vergilyn.examples.cache.VoteCache;
 import com.vergilyn.examples.entity.Vote;
 import com.vergilyn.examples.entity.VoteItem;
@@ -26,8 +25,6 @@ public class VoteTest extends AbstractTestng {
     private VoteService voteService;
     @Autowired
     private VoteCache voteCache;
-    @Autowired
-    private ObjectMapper objectMapper;
 
     private Vote vote;
     private VoteItem item;
@@ -89,10 +86,10 @@ public class VoteTest extends AbstractTestng {
     }
 
     @Test
-    public void batch() throws JsonProcessingException {
+    public void batch() {
         String json = "[\"vote:item:1229:分类1:vote_num\",\"vote:item:1229:分类1:vote_num_wx\",\"vote:item:1229:分类1:vote_num_total\",\"vote:item:1229:分类2:vote_num\",\"vote:item:1229:分类2:vote_num_wx\",\"vote:item:1229:分类2:vote_num_total\",\"vote:item:1229:分类2:vote_num\",\"vote:item:1229:分类2:vote_num_wx\",\"vote:item:1229:分类2:vote_num_total\",\"2\",\"1\",\"3\",\"65961\",\"65959\",\"65960\"]";
 
-        List<String> params = objectMapper.readValue(json, new TypeReference<List<String>>() {});
+        List<String> params = JSON.parseObject(json, new TypeReference<List<String>>() {});
 
         String script =
               "local j,p,s,e = 2, ARGV[1]+1, 0, ARGV[1]+1;"

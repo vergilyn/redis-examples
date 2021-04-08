@@ -2,8 +2,7 @@ package com.vergilyn.examples;
 
 import java.util.List;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.alibaba.fastjson.JSON;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,11 +42,9 @@ public class SpringDataRedisApplicationTest extends AbstractTestng {
 
     @Autowired
     private RedisTemplate<Object, Object> redisTemplate;
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Test
-    public void tx1() throws JsonProcessingException {
+    public void tx1() {
         String key = "tx1";
         // stringRedisTemplate 无法保证在同一个connection中执行所有命令。
         stringRedisTemplate.multi();
@@ -61,11 +58,11 @@ public class SpringDataRedisApplicationTest extends AbstractTestng {
 
         List<Object> exec = stringRedisTemplate.exec();
 
-        System.out.println(objectMapper.writeValueAsString(exec));
+        System.out.println(JSON.toJSONString(exec));
     }
 
     @Test
-    public void tx2() throws JsonProcessingException {
+    public void tx2() {
         String key = "tx2";
         // 保证在同一个connection中执行所有命令。
         List<Object> txResults = stringRedisTemplate.execute(new SessionCallback<List<Object>>() {
@@ -82,7 +79,7 @@ public class SpringDataRedisApplicationTest extends AbstractTestng {
             }
         });
 
-        System.out.println(objectMapper.writeValueAsString(txResults));
+        System.out.println(JSON.toJSONString(txResults));
     }
 
 }
