@@ -56,16 +56,13 @@ public class ImageRecentlyUseCacheImpl extends AbstractRecentlyUseCache<SourceIm
 	}
 
 	@Override
-	protected SourceImageEntity buildInvalidEntity(Integer invalidId) {
-		SourceImageEntity sourceImageEntity = new SourceImageEntity(invalidId);
-		sourceImageEntity.setDeleted(true);
-		return sourceImageEntity;
-	}
-
-	@Override
 	protected Tuple<List<SourceImageEntity>, List<SourceImageEntity>> filterEntities(List<Integer> expectedIds,
 			List<SourceImageEntity> result) {
-		Tuple<List<SourceImageEntity>, List<SourceImageEntity>> tuple = splitNormalDeleted(expectedIds, result);
+		Tuple<List<SourceImageEntity>, List<SourceImageEntity>> tuple = splitNormalDeleted(expectedIds, result, invalidId -> {
+			SourceImageEntity sourceImageEntity = new SourceImageEntity(invalidId);
+			sourceImageEntity.setDeleted(true);
+			return sourceImageEntity;
+		});
 
 		return tuple;
 	}

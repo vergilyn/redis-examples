@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSON;
@@ -37,7 +38,6 @@ public abstract class AbstractRecentlyUseCache<T extends AbstractIntegerEntity> 
 
 	protected abstract SourceTypeEnum getSourceType();
 	protected abstract List<T> listByIds(List<Integer> ids);
-	protected abstract T buildInvalidEntity(Integer invalidId);
 
 	/**
 	 * 特别：result.size <= expectedIds.size，例如数据库物理删除（或者数据库不返回逻辑删除的数据）
@@ -70,9 +70,11 @@ public abstract class AbstractRecentlyUseCache<T extends AbstractIntegerEntity> 
 			return Tuple.of(Collections.emptyList(), Collections.emptyList());
 		}
 
+		// VFIXME 2021-04-08 以下代码未解耦，子类并不好扩展。
+
 		List<Integer> ids = members.stream().map(Integer::valueOf).collect(Collectors.toList());
 
-		// 子类实现
+		// 子类实现 listByIds
 		List<T> result = listByIds(ids);
 
 		// 保证result顺序与 ids相同
@@ -133,7 +135,7 @@ public abstract class AbstractRecentlyUseCache<T extends AbstractIntegerEntity> 
 				break;
 			}
 
-		}while (valid.size() == currentPageRequest.getSize());
+		}while (valid.size() < currentPageRequest.getSize());
 
 		return source;
 	}
@@ -217,7 +219,7 @@ public abstract class AbstractRecentlyUseCache<T extends AbstractIntegerEntity> 
 	/**
 	 * @return first - 正常数据；second - 逻辑删除的数据。（first.ids + second.ids = expectedIds）
 	 */
-	protected Tuple<List<T>, List<T>> splitNormalDeleted(List<Integer> expectedIds, List<T> result){
+	protected Tuple<List<T>, List<T>> splitNormalDeleted(List<Integer> expectedIds, List<T> result, Function<Integer, T> buildInvalid){
 		Tuple<List<T>, List<T>> filter = AbstractEntity.filter(result);
 
 		List<T> normal = filter.getFirst();
@@ -229,7 +231,7 @@ public abstract class AbstractRecentlyUseCache<T extends AbstractIntegerEntity> 
 		dataIds.addAll(deleted.stream().map(AbstractIntegerEntity::getId).collect(Collectors.toList()));
 
 		expectedIds.stream().filter(integer -> !dataIds.contains(integer))
-				.forEach(integer -> deleted.add(buildInvalidEntity(integer)));
+				.forEach(integer -> deleted.add(buildInvalid.apply(integer)));
 
 		return filter;
 	}
