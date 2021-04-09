@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -23,22 +24,10 @@ import org.springframework.data.redis.core.script.RedisScript;
 
 @Slf4j
 public abstract class AbstractRecentlyUseCache<T extends AbstractIntegerEntity> implements RecentlyUseCache<T> {
-
-	/**
-	 * "最近使用" 最多保留数量
-	 */
-	private static final int MAX_SIZE = 500;
-
-	/**
-	 * "最近使用" 最多保留时间
-	 */
-	private static final int EXPIRED_DAYS_7 = 3600 * 24 * 7;
-
 	protected final StringRedisTemplate stringRedisTemplate = RedisClientFactory.getInstance().stringRedisTemplate();
 
 	protected abstract SourceTypeEnum getSourceType();
 	protected abstract List<T> listByIds(List<Integer> ids);
-
 	/**
 	 * 特别：result.size <= expectedIds.size，例如数据库物理删除（或者数据库不返回逻辑删除的数据）
 	 * @param expectedIds 期望获取数据的ids
@@ -47,9 +36,30 @@ public abstract class AbstractRecentlyUseCache<T extends AbstractIntegerEntity> 
 	 */
 	protected abstract Tuple<List<T>, List<T>> filterEntities(List<Integer> expectedIds, List<T> result);
 
+	/**
+	 * "最近使用" 最多保留数量
+	 */
+	private final long _maxSize;
+
+	/**
+	 * "最近使用" 最多保留时间
+	 */
+	private final long _expiredSeconds;
+
+	public AbstractRecentlyUseCache() {
+		this(500L, TimeUnit.DAYS.toSeconds(7));
+	}
+
+	public AbstractRecentlyUseCache(long maxSize, long expiredSeconds) {
+		this._maxSize = maxSize;
+		this._expiredSeconds = expiredSeconds;
+	}
+
 	@Override
 	public Tuple<Long, List<T>> listSourcePage(String userId, PageRequest pageRequest) {
 		Tuple<Long, List<T>> page = Tuple.of();
+
+		beforeProcessData(userId, pageRequest);
 
 		Tuple<List<T>, List<T>> data = listSourcePageInner(userId, pageRequest);
 
@@ -62,6 +72,12 @@ public abstract class AbstractRecentlyUseCache<T extends AbstractIntegerEntity> 
 		page.setFirst(getTotal(userId));
 
 		return page;
+	}
+
+	protected void beforeProcessData(String userId, PageRequest pageRequest){
+		// 严格控制每个资源最近使用的失效时间（不只由key控制）
+		double minScore = buildScore(LocalDateTime.now().plusSeconds(-getExpiredSeconds()));
+		stringRedisTemplate.boundZSetOps(key(userId)).removeRangeByScore(0, minScore);
 	}
 
 	protected final Tuple<List<T>, List<T>> listSourcePageInner(String userId, PageRequest pageRequest){
@@ -189,9 +205,9 @@ public abstract class AbstractRecentlyUseCache<T extends AbstractIntegerEntity> 
 		List<String> keys = Lists.newArrayList(key(userId));
 
 		List<String> args = Lists.newArrayListWithCapacity(members.size() + 2);
-		args.add(MAX_SIZE + "");
-		args.add(EXPIRED_DAYS_7 + "");
-		args.add(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")));
+		args.add(getMaxSize() + "");
+		args.add(getExpiredSeconds() + "");
+		args.add(buildScore(LocalDateTime.now()) + "");
 		args.addAll(members);
 
 		Boolean expire = stringRedisTemplate.execute(script, keys, args.toArray());
@@ -212,8 +228,26 @@ public abstract class AbstractRecentlyUseCache<T extends AbstractIntegerEntity> 
 							getSourceType().name(), result, userId, JSON.toJSONString(members));
 	}
 
+	protected double buildScore(LocalDateTime dateTime){
+		return Double.parseDouble(dateTime.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")));
+	}
+
 	private String key(String userId){
 		return String.format("vergilyn:used:%s:%s", getSourceType().name().toLowerCase(), userId);
+	}
+
+	/**
+	 * "最近使用" 最多保留数量
+	 */
+	protected long getMaxSize(){
+		return this._maxSize;
+	}
+
+	/**
+	 * "最近使用" 最多保留时间
+	 */
+	protected long getExpiredSeconds(){
+		return this._expiredSeconds;
 	}
 
 	/**

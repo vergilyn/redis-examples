@@ -30,6 +30,14 @@ public class ImageRecentlyUseCacheImpl extends AbstractRecentlyUseCache<SourceIm
 		}
 	}
 
+	public ImageRecentlyUseCacheImpl() {
+		super();
+	}
+
+	public ImageRecentlyUseCacheImpl(long maxSize, long expiredSeconds) {
+		super(maxSize, expiredSeconds);
+	}
+
 	@Override
 	protected RecentlyUseCache.SourceTypeEnum getSourceType() {
 		return IMAGE;

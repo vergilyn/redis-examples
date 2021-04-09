@@ -2,14 +2,17 @@ package com.vergilyn.examples.redis.cache;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Lists;
 import com.vergilyn.examples.redis.PageRequest;
 import com.vergilyn.examples.redis.Tuple;
 import com.vergilyn.examples.redis.cache.impl.ImageRecentlyUseCacheImpl;
 import com.vergilyn.examples.redis.entity.SourceImageEntity;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -60,5 +63,23 @@ public class ImageRecentlyUseTestng {
 		assertThat(tuple.getFirst()).isEqualTo(DATASOURCE.size());
 		assertThat(tuple.getSecond().stream().map(SourceImageEntity::getId))
 				.containsExactlyInAnyOrder(14, 13, 12, 11, 10);
+	}
+
+	@SneakyThrows
+	@Test
+	public void expired(){
+		RecentlyUseCache<SourceImageEntity> cache = new ImageRecentlyUseCacheImpl(10, 15);
+
+		cache.add(userId, Lists.newArrayList("10", "11"));
+		TimeUnit.SECONDS.sleep(12);
+
+		cache.add(userId, Lists.newArrayList("12", "13"));
+		TimeUnit.SECONDS.sleep(4);
+
+		Tuple<Long, List<SourceImageEntity>> tuple = cache.listSourcePage(userId, PageRequest.of(1, 10));
+
+		assertThat(tuple.getFirst()).isEqualTo(2L);
+		assertThat(tuple.getSecond().stream().map(SourceImageEntity::getId))
+				.containsExactly(13, 12);
 	}
 }
