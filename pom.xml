@@ -13,7 +13,8 @@
         <module>redis-cluster-examples</module>
         <module>redis-sentinel-examples</module>
         <module>spring-data-redis-examples</module>
-        <module>redis-script-examples</module>
+        <module>redis-usage-examples</module>
+        <module>vergilyn-redis-commons</module>
     </modules>
 
     <properties>
@@ -59,16 +60,17 @@
                 <scope>import</scope>
             </dependency>
 
+            <dependency>
+                <groupId>com.vergilyn.examples</groupId>
+                <artifactId>vergilyn-redis-commons</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
 
             <dependency>
                 <groupId>redis.clients</groupId>
                 <artifactId>jedis</artifactId>
                 <version>${jedis.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.redisson</groupId>
-                <artifactId>redisson</artifactId>
-                <version>${redisson.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.lmax</groupId>
@@ -189,6 +191,14 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.lua</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
