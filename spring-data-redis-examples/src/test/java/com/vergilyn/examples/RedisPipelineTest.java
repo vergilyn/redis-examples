@@ -125,7 +125,7 @@ public class RedisPipelineTest extends AbstractTestng {
         LettuceConnection lettuceConnection = (LettuceConnection) stringRedisTemplate.getConnectionFactory().getConnection();
         RedisClusterAsyncCommands<byte[], byte[]> commands = lettuceConnection.getNativeConnection();
 
-        // 如果想达到打包发送请求的效果（类似jedis-匹配李恩），需要设置`autoFlushCommands=false`
+        // 如果想达到打包发送请求的效果（类似jedis-pipeline），需要设置`autoFlushCommands=false`
         // disable auto-flushing
         commands.setAutoFlushCommands(false);
         commands.setTimeout(Duration.ofMinutes(10));

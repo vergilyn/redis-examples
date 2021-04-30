@@ -1,6 +1,5 @@
 package com.vergilyn.examples.commons.redis;
 
-import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisClientConfiguration;
@@ -9,10 +8,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 @SuppressWarnings("ALL")
-public class RedisClientFactory {
-	public static final String DEFAULT_HOST = "127.0.0.1";
-	public static final int DEFAULT_PORT = 56379;
-
+public class RedisClientFactory extends AbstractRedisClient{
 	private final RedisTemplate<Object, Object> _redisTemplate;
 	private final StringRedisTemplate _stringRedisTemplate;
 
@@ -21,6 +17,9 @@ public class RedisClientFactory {
 	private final String host;
 	private final int port;
 
+	/**
+	 * @see org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+	 */
 	private RedisClientFactory(String host, int port) {
 		this.host = host;
 		this.port = port;
@@ -29,6 +28,8 @@ public class RedisClientFactory {
 
 		this._redisTemplate = new RedisTemplate<>();
 		this._redisTemplate.setConnectionFactory(redisConnectionFactory);
+		// _redisTemplate.setKeySerializer();
+		// _redisTemplate.setStringSerializer();
 		this._redisTemplate.afterPropertiesSet();
 
 		this._stringRedisTemplate = new StringRedisTemplate();
@@ -37,16 +38,11 @@ public class RedisClientFactory {
 	}
 
 	/**
-	 * @see JedisConnectionConfiguration#createJedisConnectionFactory(org.springframework.beans.factory.ObjectProvider)
+	 * @see org.springframework.boot.autoconfigure.data.redis.JedisConnectionConfiguration#createJedisConnectionFactory(org.springframework.beans.factory.ObjectProvider)
 	 */
 	private RedisConnectionFactory buildRedisConnectionFactory() {
-		GenericObjectPoolConfig poolConfig = new GenericObjectPoolConfig();
-		poolConfig.setMaxTotal(64);
-		poolConfig.setMinIdle(0);
-		poolConfig.setMaxIdle(8);
-
 		JedisClientConfiguration.JedisClientConfigurationBuilder builder = JedisClientConfiguration.builder();
-		builder.usePooling().poolConfig(poolConfig);
+		builder.usePooling().poolConfig(poolConfig());
 
 		JedisClientConfiguration clientConfiguration = builder.build();
 
@@ -54,7 +50,7 @@ public class RedisClientFactory {
 	}
 
 	/**
-	 * @see RedisConnectionConfiguration#getStandaloneConfig()
+	 * @see org.springframework.boot.autoconfigure.data.redis.RedisConnectionConfiguration#getStandaloneConfig()
 	 */
 	private final RedisStandaloneConfiguration getStandaloneConfig() {
 		RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
@@ -90,5 +86,9 @@ public class RedisClientFactory {
 
 	public RedisTemplate<Object, Object> redisTemplate() {
 		return getInstance()._redisTemplate;
+	}
+
+	public <K, V> RedisTemplate<K, V> redisTemplate(Class<K> kClass, Class<V> vClass) {
+		return (RedisTemplate<K, V>) this._redisTemplate;
 	}
 }
