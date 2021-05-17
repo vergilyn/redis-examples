@@ -3,6 +3,7 @@ package com.vergilyn.examples.commons.redis;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+import redis.clients.jedis.JedisPoolConfig;
 
 /**
  * @author vergilyn
@@ -16,7 +17,7 @@ public abstract class AbstractRedisClient {
 
 	@SuppressWarnings("ALL")
 	protected final GenericObjectPoolConfig poolConfig(){
-		GenericObjectPoolConfig poolConfig = new GenericObjectPoolConfig();
+		JedisPoolConfig poolConfig = new JedisPoolConfig();
 		poolConfig.setMaxTotal(64);
 		poolConfig.setMinIdle(8);
 		poolConfig.setMaxIdle(16);
@@ -31,7 +32,7 @@ public abstract class AbstractRedisClient {
 
 		// JedisPool中连接的空闲时间阈值，当达到这个阈值时，空闲连接就会被移除。
 		// Redis的默认值是30分钟
-		poolConfig.setMinEvictableIdleTimeMillis(TimeUnit.MINUTES.toMillis(5));
+		poolConfig.setMinEvictableIdleTimeMillis(TimeUnit.MINUTES.toMillis(30));
 
 		// 检测空闲连接的周期
 		poolConfig.setTimeBetweenEvictionRunsMillis(TimeUnit.SECONDS.toMillis(30));

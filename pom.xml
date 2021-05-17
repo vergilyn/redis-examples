@@ -9,7 +9,6 @@
     <version>${revision}</version>
 
     <modules>
-        <module>redis-basic</module>
         <module>redis-cluster-examples</module>
         <module>redis-sentinel-examples</module>
         <module>spring-data-redis-examples</module>

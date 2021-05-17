@@ -1,4 +1,4 @@
-package com.vergilyn.examples.jedis.security;
+package com.vergilyn.examples.jedis.threadsafe;
 
 import java.util.List;
 import java.util.Map;

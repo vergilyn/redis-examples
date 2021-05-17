@@ -18,5 +18,10 @@
             <groupId>com.vergilyn.examples</groupId>
             <artifactId>vergilyn-redis-commons</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
     </dependencies>
 </project>

@@ -16,11 +16,7 @@ import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.StringRedisConnection;
 import org.springframework.data.redis.connection.lettuce.LettuceConnection;
 import org.springframework.data.redis.core.RedisCallback;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.Pipeline;
-import redis.clients.jedis.util.RedisOutputStream;
 
 /**
  * @author VergiLyn
@@ -29,72 +25,19 @@ import redis.clients.jedis.util.RedisOutputStream;
 @SpringBootTest(classes = SpringDataRedisApplication.class)
 @Slf4j
 public class RedisPipelineTest extends AbstractTestng {
-    /**
-     * `get jedis`  --RESP--> `*2\r\n$3\r\nget\r\n$5\r\njedis\r\n`, len=24;
-     * jedis-pipeline的client-output-buffer限制：8192 (这个数字也是有意义的，未去了解)。8192 / 24 ≈ 341 条命令为一个数据包。
-     *
-     * @see RedisOutputStream#RedisOutputStream(java.io.OutputStream) jedis默认限制output-buffer=8192。
-     */
-    @Test(dataProvider = "pipelineData", threadPoolSize = 2, invocationCount = 1)
-    public void jedisPipeline(boolean flag){
-        String key = "jedis";
-
-        Jedis jedis = jedisPool.getResource();
-        Pipeline pipeline = jedis.pipelined();
-        int num = 0, limit = 342;
-        List<Object> list;
-
-        if (flag){
-            while (num++ < limit) {
-                pipeline.incr(key);
-            }
-
-            list = pipeline.syncAndReturnAll();
-
-            log.info("exec: incr, key: {}, result: {} \r\n", key, StringUtils.join(list, ","));
-        }else {
-            while (num++ < limit) {
-                pipeline.get(key);
-            }
-
-            list = pipeline.syncAndReturnAll();
-            log.info("exec: get, key: {}, result: {} \r\n", key, StringUtils.join(list, ","));
-        }
-
-        jedis.close();
-    }
-
 
     /**
-     * `get jedis`  --RESP--> `*2\r\n$3\r\nget\r\n$5\r\njedis\r\n`, len=24;
-     * redis --response RESP--> `$3\r\n342\r\n`, len=9.
-     */
-    @Test
-    public void jedisPipelineGet(){
-        String key = "jedis";
-
-        Jedis jedis = jedisPool.getResource();
-        Pipeline pipeline = jedis.pipelined();
-
-        int num = 0, limit = 400;
-        while (num++ < limit) {
-            pipeline.get(key);
-        }
-
-        List<Object> list = pipeline.syncAndReturnAll();
-        jedis.close();
-
-        log.info("exec: jedis-pipeline-get, key: {}, result: {} \r\n", key, StringUtils.join(list, ","));
-    }
-
-    /**
-     * 感觉是写法问题，也可能是lettuce的问题。
      * 跟jedis-pipeline表现出来并不同，lettuce还是一个完整的命令RESP为一次TCP请求。
      *
-     * 代码参考: https://docs.spring.io/spring-data/redis/docs/2.1.8.RELEASE/reference/html/#pipeline
+     * @see <a href="https://emacsist.github.io/2019/07/30/spring-data-redis%E4%B8%8Elettuce-%E4%BD%BF%E7%94%A8-pipeline-%E6%97%B6%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9/">
+     *     Spring Data Redis与Lettuce 使用 pipeline 时注意事项</a>
+     * @see <a href="https://github.com/spring-projects/spring-data-redis/issues/1581">
+     *     Lettuce pipelining behaviour is different than Jedis pipelining [DATAREDIS-1011] </a>
+     * @see <a href="https://docs.spring.io/spring-data/redis/docs/2.2.11.RELEASE/reference/html/#pipeline">
+     *     spring-data-redis pipeline</a>
      */
     @Test
-    public void lettucePipelineGet(){
+    public void lettuce(){
         String key = "lettuce";
         int limit = 400;
 
@@ -105,21 +48,32 @@ public class RedisPipelineTest extends AbstractTestng {
 
                 int num = 0;
                 while (num++ < limit) {
-                    stringRedisConn.get(key.getBytes());
+                    stringRedisConn.incr(key.getBytes());
                 }
                 return null;
             }
         });
 
-        log.info("exec: get, key: {}, result: {} \r\n", key, StringUtils.join(list, ","));
+        log.info("exec: incr, key: {}, result: {} \r\n", key, StringUtils.join(list, ","));
     }
 
     /**
-     * 参考: https://lettuce.io/core/release/reference/index.html#_pipelining_and_command_flushing
+     * `incr lettuce:manual` --RESP--> 45, `*2\r\n$4\r\nINCR\r\n$14\r\nlettuce:manual\r\n` <br/>
+     *
+     * <p>
+     * 通过wireshark抓包可知：
+     *  lettuce 一般会按 604(bytes)发送N次，但是也可能在这之后再按 1724/2284 发送几次。<br/>
+     *  <b>lettuce pipeline 保证每次 PSH 中的RESP协议都是完整，而jedis强制按8192(bytes)分次发送</b>
+     * </p>
+     *
+     * VTODO 2021-05-17 lettuce 分组策略源码位置？
+     *
+     * @see <a href="https://lettuce.io/core/release/reference/index.html#_pipelining_and_command_flushing">
+     *     lettuce _pipelining_and_command_flushing</a>
      */
     @Test
     public void lettucePipeline(){
-        String key = "lettuce";
+        String key = "lettuce:manual";
         int limit = 400;
 
         LettuceConnection lettuceConnection = (LettuceConnection) stringRedisTemplate.getConnectionFactory().getConnection();
@@ -131,9 +85,9 @@ public class RedisPipelineTest extends AbstractTestng {
         commands.setTimeout(Duration.ofMinutes(10));
 
         // perform a series of independent calls
-        List<RedisFuture<byte[]>> futures = Lists.newArrayList();
+        List<RedisFuture<Long>> futures = Lists.newArrayList();
         for (int i = 0; i < limit; i++) {
-            futures.add(commands.get(key.getBytes()));
+            futures.add(commands.incr(key.getBytes()));
         }
 
         // 因为`autoFlushCommands=false`，所以需要手动提交命令
@@ -143,7 +97,7 @@ public class RedisPipelineTest extends AbstractTestng {
         List<Object> result = Lists.newArrayList();
         futures.forEach(e -> {
             try {
-                result.add(new String(e.get()));
+                result.add(e.get());
             } catch (InterruptedException | ExecutionException ex) {
                 ex.printStackTrace();
             }
@@ -155,10 +109,4 @@ public class RedisPipelineTest extends AbstractTestng {
         log.info("exec: lettuce-get, key: {}, result: {} \r\n", key, StringUtils.join(result, ","));
 
     }
-
-    @DataProvider(name = "pipelineData", parallel = true)
-    private Object[][] pipelineData(){
-        return new Object[][]{{true}, {false}};
-    }
-
 }

@@ -1,13 +1,16 @@
-package com.vergilyn.examples;
+package com.vergilyn.examples.jedis.multi;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.vergilyn.examples.commons.redis.JedisClientFactory;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
@@ -22,11 +25,15 @@ import redis.clients.jedis.Response;
  *     1. 因为参数emptySet可能是null, 所以才有clazz; 否则可以直接从emptySet获取到T.class; <br/>
  *     2. 因为参数不一致, 导致大量的代码重复. 每个批量get只有很少一部分代码是特殊的.
  * </p>
- * @author VergiLyn
- * @blog http://www.cnblogs.com/VergiLyn/
- * @date 2018/3/11
+ * @author vergilyn
+ * @date 2021-05-06
  */
-public class JedisMultiUtils {
+@Slf4j
+public class JedisPipelineMultiGet {
+
+    private static Jedis getJedis(){
+        return JedisClientFactory.getInstance().jedis();
+    }
 
     /**
      *
@@ -35,13 +42,13 @@ public class JedisMultiUtils {
      * @param emptySet 当某个key的结果是null时, 执行emptySet;
      * @return key: redis-key, value: clazz转换的结果;
      */
-    public static <T> Map<String, T> mgetString(String[] keys, Class<T> clazz, RedisMultiAbstract<T> emptySet){
+    public static <T> Map<String, T> mgetString(String[] keys, Class<T> clazz, Function<String, T> emptySet){
         Jedis jedis = null;
         Pipeline pipelined = null;
         Map<String, T> result = Maps.newHashMap();
         List<String> reqKeys = Lists.newArrayList(keys);
         try {
-            jedis = JedisUtils.getJedis();
+            jedis = getJedis();
             pipelined = jedis.pipelined();
 
             handleNotExistsKey(result, reqKeys, pipelined, emptySet);
@@ -58,7 +65,7 @@ public class JedisMultiUtils {
 
             return result;
         }catch (Exception e){
-            e.printStackTrace();
+            log.error("`mgetString()` error: {}", e.getMessage(), e);
         } finally {
             close(jedis, pipelined);
         }
@@ -71,13 +78,13 @@ public class JedisMultiUtils {
      * @param emptySet
      * @return
      */
-    public static Map<String, Map<String, String>> mgetHash(String[] keys, String[] fields, RedisMultiAbstract<Map<String, String>> emptySet){
+    public static Map<String, Map<String, String>> mgetHash(String[] keys, String[] fields, Function<String, Map<String, String>> emptySet){
         Jedis jedis = null;
         Pipeline pipelined = null;
         Map<String, Map<String, String>> result = Maps.newHashMap();
         List<String> reqKeys = Lists.newArrayList(keys);
         try {
-            jedis = JedisUtils.getJedis();
+            jedis = getJedis();
             pipelined = jedis.pipelined();
 
             handleNotExistsKey(result, reqKeys, pipelined, emptySet);
@@ -118,7 +125,7 @@ public class JedisMultiUtils {
 
             return result;
         }catch (Exception e){
-            e.printStackTrace();
+            log.error("`mgetHash()` error: {}", e.getMessage(), e);
         } finally {
             close(jedis, pipelined);
         }
@@ -130,13 +137,13 @@ public class JedisMultiUtils {
      * 注意: 用的是<code>redis.lrange(key, start, end)</code>, 自己需要注意RedisMultiAbstract返回的LIST的顺序
      * @return key: redis-key, value: redis-key对应的LIST数据结构
      */
-    public static <T> Map<String, List<T>> mgetListLrange(String[] keys, int start, int end, Class<T> clazz, RedisMultiAbstract<List<T>> emptySet){
+    public static <T> Map<String, List<T>> mgetListLrange(String[] keys, int start, int end, Class<T> clazz, Function<String, List<T>> emptySet){
         Jedis jedis = null;
         Pipeline pipelined = null;
         Map<String, List<T>> rs = Maps.newHashMap();
         List<String> reqKeys = Lists.newArrayList(keys);
         try {
-            jedis = JedisUtils.getJedis();
+            jedis = getJedis();
             pipelined = jedis.pipelined();
 
             handleNotExistsKey(rs, reqKeys, pipelined, emptySet);
@@ -161,7 +168,7 @@ public class JedisMultiUtils {
 
             return rs;
         }catch (Exception e){
-            e.printStackTrace();
+            log.error("`mgetListLrange()` error: {}", e.getMessage(), e);
         } finally {
             close(jedis, pipelined);
         }
@@ -169,13 +176,13 @@ public class JedisMultiUtils {
         return null;
     }
 
-    public static <T> Map<String, List<T>> mgetSet(String[] keys, Class<T> clazz, RedisMultiAbstract<List<T>> emptySet){
+    public static <T> Map<String, List<T>> mgetSet(String[] keys, Class<T> clazz, Function<String, List<T>> emptySet){
         Jedis jedis = null;
         Pipeline pipelined = null;
         Map<String, List<T>> rs = Maps.newHashMap();
         List<String> reqKeys = Lists.newArrayList(keys);
         try {
-            jedis = JedisUtils.getJedis();
+            jedis = getJedis();
             pipelined = jedis.pipelined();
 
             handleNotExistsKey(rs, reqKeys, pipelined, emptySet);
@@ -200,7 +207,7 @@ public class JedisMultiUtils {
 
             return rs;
         }catch (Exception e){
-            e.printStackTrace();
+            log.error("`mgetSet()` error: {}", e.getMessage(), e);
         } finally {
             close(jedis, pipelined);
         }
@@ -208,13 +215,13 @@ public class JedisMultiUtils {
         return null;
     }
 
-    public static <T> Map<String, List<T>> mgetSort(String[] keys, int start, int end, Class<T> clazz, RedisMultiAbstract<List<T>> emptySet){
+    public static <T> Map<String, List<T>> mgetSort(String[] keys, int start, int end, Class<T> clazz, Function<String, List<T>> emptySet){
         Jedis jedis = null;
         Pipeline pipelined = null;
         Map<String, List<T>> rs = Maps.newHashMap();
         List<String> reqKeys = Lists.newArrayList(keys);
         try {
-            jedis = JedisUtils.getJedis();
+            jedis = getJedis();
             pipelined = jedis.pipelined();
 
             handleNotExistsKey(rs, reqKeys, pipelined, emptySet);
@@ -238,7 +245,7 @@ public class JedisMultiUtils {
 
             return rs;
         }catch (Exception e){
-            e.printStackTrace();
+            log.error("`mgetSort()` error: {}", e.getMessage(), e);
         } finally {
             close(jedis, pipelined);
         }
@@ -256,8 +263,34 @@ public class JedisMultiUtils {
                 pipelined.close();
             }
         }catch (Exception e){
-            e.printStackTrace();
+            log.error("close jedis/pipeline error: {}", e.getMessage(), e);
         }
+    }
+
+    /**
+     * 当keys[index]不存在时执行 {@code emptySet}, 将(非NULL)结果写入result
+     */
+    private static <T> void handleNotExistsKey(Map<String, T> result, List<String> reqKeys, Pipeline pipelined, Function<String, T> emptySet){
+
+        if(emptySet == null){
+            return;
+        }
+
+        Map<String, Response<Boolean>> responseMap = Maps.newHashMap();
+        for(String key : reqKeys) {
+            responseMap.put(key, pipelined.exists(key));
+        }
+
+        pipelined.sync();
+
+        responseMap.forEach((key, value) -> {
+            if(value == null){
+                result.put(key, emptySet.apply(key));
+                reqKeys.remove(key);
+            }
+        });
+
+        pipelined.clear();
     }
 
     private static <T> T transResult(String val, Class<T> clazz) {
@@ -284,36 +317,5 @@ public class JedisMultiUtils {
         }else{
             return JSON.parseObject(val, clazz);
         }
-    }
-
-    /**
-     * 当keys[index]不存在时执行{@link RedisMultiAbstract#emptySet(String)}, 将结果写入result
-     */
-    private static <T> void handleNotExistsKey(Map<String, T> result, List<String> reqKeys, Pipeline pipelined, RedisMultiAbstract<T> emptySet){
-
-        if(emptySet == null){
-            return ;
-        }
-
-        Map<String, Response<Boolean>> responseMap = Maps.newHashMap();
-        for(String key : reqKeys) {
-            responseMap.put(key, pipelined.exists(key));
-        }
-
-        pipelined.sync();
-
-        for (Map.Entry<String, Response<Boolean>> entrySet : responseMap.entrySet()) {
-            String key = entrySet.getKey();
-            Boolean value = entrySet.getValue().get();
-            boolean isExist = value == null ? false : value;
-
-            if(!isExist){
-                result.put(key, emptySet.emptySet(key));
-                reqKeys.remove(key);
-            }
-        }
-
-        pipelined.clear();
-
     }
 }

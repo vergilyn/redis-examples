@@ -3,7 +3,7 @@ spring:
     name: springboot-redis-examples
   redis:
     host: localhost
-    port: 6379
+    port: 56379
     database: 0
     timeout: 20s
     lettuce:
