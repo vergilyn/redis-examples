@@ -3,6 +3,7 @@ package com.vergilyn.examples.commons.utils;
 import java.io.ByteArrayOutputStream;
 
 import io.lettuce.core.protocol.BaseRedisCommandBuilder;
+import io.lettuce.core.protocol.Command;
 import io.lettuce.core.protocol.CommandType;
 import org.apache.commons.text.StringEscapeUtils;
 import redis.clients.jedis.Protocol;
@@ -38,6 +39,7 @@ public abstract class RedisCommandUtils {
 	/**
 	 * spring-data-redis lettuce
 	 *
+	 * @see Command#encode(io.netty.buffer.ByteBuf)
 	 * @see BaseRedisCommandBuilder
 	 * @see io.lettuce.core.RedisCommandBuilder
 	 */

@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.vergilyn.examples.commons.domain.PageRequest;
 import com.vergilyn.examples.commons.domain.Tuple;
-import com.vergilyn.examples.redis.usage.u0002.entity.AbstractIntegerEntity;
 
 /**
  * 最近使用
@@ -12,7 +11,7 @@ import com.vergilyn.examples.redis.usage.u0002.entity.AbstractIntegerEntity;
  * @author vergilyn
  * @since 2021-04-06
  */
-public interface RecentlyUseCache<T extends AbstractIntegerEntity> {
+public interface RecentlyUseCache<T> {
 
 	/**
 	 * 分页获取
