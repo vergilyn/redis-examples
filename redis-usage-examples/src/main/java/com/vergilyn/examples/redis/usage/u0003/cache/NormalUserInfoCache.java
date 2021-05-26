@@ -23,8 +23,7 @@ import org.springframework.data.redis.core.RedisTemplate;
  * @since 2021-04-30
  */
 public class NormalUserInfoCache implements AbstractUserInfoCache{
-	protected final RedisTemplate<String, UserInfoEntity> redisTemplate = RedisClientFactory.getInstance()
-																.redisTemplate(String.class, UserInfoEntity.class);
+	protected final RedisTemplate<String, UserInfoEntity> redisTemplate = RedisClientFactory.getInstance().redisTemplate();
 
 	protected final UserInfoService userInfoService = new UserInfoService();
 

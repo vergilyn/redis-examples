@@ -23,8 +23,7 @@ public class OptUserInfoCache extends AbstractAliasCache<UserInfoEntity> impleme
 	protected final UserInfoService userInfoService = new UserInfoService();
 
 	public OptUserInfoCache() {
-		super(RedisClientFactory.getInstance()
-				.redisTemplate(String.class, UserInfoEntity.class));
+		super(RedisClientFactory.getInstance().redisTemplate());
 	}
 
 	@Override

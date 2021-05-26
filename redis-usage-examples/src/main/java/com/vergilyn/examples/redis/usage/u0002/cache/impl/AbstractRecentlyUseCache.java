@@ -75,6 +75,14 @@ public abstract class AbstractRecentlyUseCache<ID, T extends AbstractEntity<ID>>
 		stringRedisTemplate.boundZSetOps(redisKey).removeRangeByScore(0, minScore);
 	}
 
+	/**
+	 *
+	 * 之所以需要`first`的结果，原因是：
+	 *  如果DB存在physically-deleted，此时ids.size=10，data.size可能小于10，为了后续可以找出这些ids。
+	 * @param redisKey
+	 * @param pageRequest
+	 * @return first: ids, second: db-data。
+	 */
 	protected final Tuple<List<ID>, List<T>> listSourcePageInner(String redisKey, PageRequest pageRequest){
 		List<String> members = zrevrange(redisKey, pageRequest);
 
