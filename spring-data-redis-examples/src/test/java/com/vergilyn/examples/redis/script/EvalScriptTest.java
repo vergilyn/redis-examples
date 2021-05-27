@@ -2,8 +2,8 @@ package com.vergilyn.examples.redis.script;
 
 import com.vergilyn.examples.redis.AbstractRedisClientTests;
 
+import org.junit.jupiter.api.Test;
 import org.springframework.data.redis.core.script.RedisScript;
-import org.testng.annotations.Test;
 import org.testng.collections.Lists;
 
 /**
@@ -21,7 +21,7 @@ public class EvalScriptTest extends AbstractRedisClientTests {
         String key = "redis:script";
         RedisScript<Long> redisScript = RedisScript.of(script, Long.class);
 
-        Long eval = _stringRedisTemplate.execute(redisScript, Lists.newArrayList(key), "10");
+        Long eval = stringRedisTemplate.execute(redisScript, Lists.newArrayList(key), "10");
         System.out.println("script response >>>> " + eval);
     }
 }

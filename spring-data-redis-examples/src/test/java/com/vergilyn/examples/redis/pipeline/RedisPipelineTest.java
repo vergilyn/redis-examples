@@ -10,12 +10,12 @@ import com.vergilyn.examples.redis.AbstractRedisClientTests;
 import io.lettuce.core.RedisFuture;
 import io.lettuce.core.cluster.api.async.RedisClusterAsyncCommands;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.StringRedisConnection;
 import org.springframework.data.redis.connection.lettuce.LettuceConnection;
 import org.springframework.data.redis.core.RedisCallback;
-import org.testng.annotations.Test;
 
 /**
  * @author VergiLyn
@@ -38,7 +38,7 @@ public class RedisPipelineTest extends AbstractRedisClientTests {
         String key = "lettuce:pipeline";
         int limit = 400;
 
-        List<Object> list = _stringRedisTemplate.executePipelined(new RedisCallback<Object>() {
+        List<Object> list = stringRedisTemplate.executePipelined(new RedisCallback<Object>() {
             @Override
             public Object doInRedis(RedisConnection connection) throws DataAccessException {
                 StringRedisConnection stringRedisConn = (StringRedisConnection)connection;
@@ -74,7 +74,7 @@ public class RedisPipelineTest extends AbstractRedisClientTests {
         String key = "lettuce:pipeline:manual";
         int limit = 400;
 
-        LettuceConnection lettuceConnection = (LettuceConnection) _stringRedisTemplate.getConnectionFactory().getConnection();
+        LettuceConnection lettuceConnection = (LettuceConnection) stringRedisTemplate.getConnectionFactory().getConnection();
         RedisClusterAsyncCommands<byte[], byte[]> commands = lettuceConnection.getNativeConnection();
 
         // 如果想达到打包发送请求的效果（类似jedis-pipeline），需要设置`autoFlushCommands=false`

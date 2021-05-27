@@ -2,6 +2,8 @@ package com.vergilyn.examples.redis.generic;
 
 import java.time.Duration;
 
+import javax.annotation.Resource;
+
 import com.alibaba.fastjson.JSON;
 import com.vergilyn.examples.redis.AbstractRedisClientTests;
 
@@ -17,12 +19,16 @@ import org.springframework.data.redis.core.RedisTemplate;
  */
 class RedisTemplateGenericTests extends AbstractRedisClientTests {
 
+	@Resource
+	RedisTemplate<String, Parent> parentRedisTemplate;
+	@Resource
+	RedisTemplate<String, Child> childRedisTemplate;
+
 	@Test
 	public void parent(){
 		String key = "generic:template:parent";
 		Parent value =  new Parent(1000);
 
-		RedisTemplate<String, Parent> parentRedisTemplate = redisTemplate();
 		parentRedisTemplate.opsForValue().set(key, value, Duration.ofSeconds(2L));
 
 		Parent parent = parentRedisTemplate.opsForValue().get(key);
@@ -34,10 +40,9 @@ class RedisTemplateGenericTests extends AbstractRedisClientTests {
 		String key = "generic:template:child";
 		Child value =  new Child(1001);
 
-		RedisTemplate<String, Child> parentRedisTemplate = redisTemplate();
-		parentRedisTemplate.opsForValue().set(key, value, Duration.ofSeconds(2L));
+		childRedisTemplate.opsForValue().set(key, value, Duration.ofSeconds(2L));
 
-		Child parent = parentRedisTemplate.opsForValue().get(key);
+		Child parent = childRedisTemplate.opsForValue().get(key);
 		System.out.printf("get parent: %s \n", JSON.toJSONString(parent));
 	}
 

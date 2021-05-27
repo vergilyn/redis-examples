@@ -1,17 +1,15 @@
 package com.vergilyn.examples.commons.redis;
 
-import com.alibaba.fastjson.parser.Feature;
-import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.alibaba.fastjson.support.config.FastJsonConfig;
-import com.alibaba.fastjson.support.spring.FastJsonRedisSerializer;
+import com.vergilyn.examples.commons.serializer.RedisSerializerFactory;
 
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisClientConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
+import org.springframework.data.redis.core.RedisKeyValueAdapter;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.serializer.RedisSerializer;
 
 @SuppressWarnings("ALL")
@@ -20,8 +18,9 @@ public class RedisClientFactory extends AbstractRedisClient{
 
 	private final RedisTemplate<Object, Object> _redisTemplate;
 	private final StringRedisTemplate _stringRedisTemplate;
+	private final RedisMessageListenerContainer _redisMessageListenerContainer;
 
-	private final RedisSerializer defalutRedisSerializer = getFastJsonRedisSerializer();
+	private final RedisSerializer defalutRedisSerializer = RedisSerializerFactory.fastjson();
 
 	private final String host;
 	private final int port;
@@ -35,11 +34,9 @@ public class RedisClientFactory extends AbstractRedisClient{
 
 		RedisConnectionFactory redisConnectionFactory = buildRedisConnectionFactory();
 
-		this._redisTemplate = buildRedisTemplate(redisConnectionFactory);
-		this._redisTemplate.afterPropertiesSet();
-
-		this._stringRedisTemplate = buildStringRedisTemplate(redisConnectionFactory);
-		this._stringRedisTemplate.afterPropertiesSet();
+		this._redisTemplate = instanceRedisTemplate(redisConnectionFactory);
+		this._stringRedisTemplate = instanceStringRedisTemplate(redisConnectionFactory);
+		this._redisMessageListenerContainer = instanceListenerContainer(redisConnectionFactory);
 	}
 
 	public static RedisClientFactory getInstance() {
@@ -69,6 +66,10 @@ public class RedisClientFactory extends AbstractRedisClient{
 		return (RedisTemplate<K, V>) this._redisTemplate;
 	}
 
+	public RedisMessageListenerContainer redisListenerContainer() {
+		return this._redisMessageListenerContainer;
+	}
+
 	/**
 	 * spring-data-redis默认禁用事务支持。
 	 *
@@ -80,7 +81,7 @@ public class RedisClientFactory extends AbstractRedisClient{
 		_redisTemplate.setEnableTransactionSupport(true);
 	}
 
-	private RedisTemplate<Object, Object> buildRedisTemplate(RedisConnectionFactory connectionFactory){
+	private RedisTemplate<Object, Object> instanceRedisTemplate(RedisConnectionFactory connectionFactory){
 		RedisTemplate<Object, Object> redisTemplate = new RedisTemplate<>();
 		redisTemplate.setConnectionFactory(connectionFactory);
 
@@ -90,22 +91,33 @@ public class RedisClientFactory extends AbstractRedisClient{
 		redisTemplate.setValueSerializer(defalutRedisSerializer);
 		redisTemplate.setHashValueSerializer(defalutRedisSerializer);
 
+		redisTemplate.afterPropertiesSet();
 		return redisTemplate;
 	}
 
 	/**
 	 * @see StringRedisTemplate
 	 */
-	private StringRedisTemplate buildStringRedisTemplate(RedisConnectionFactory connectionFactory){
-		StringRedisTemplate stringRedisTemplate = new StringRedisTemplate();
-		stringRedisTemplate.setConnectionFactory(connectionFactory);
+	private StringRedisTemplate instanceStringRedisTemplate(RedisConnectionFactory connectionFactory){
+		StringRedisTemplate template = new StringRedisTemplate();
+		template.setConnectionFactory(connectionFactory);
 
-		stringRedisTemplate.setKeySerializer(RedisSerializer.string());
-		stringRedisTemplate.setValueSerializer(RedisSerializer.string());
-		stringRedisTemplate.setHashKeySerializer(RedisSerializer.string());
-		stringRedisTemplate.setHashValueSerializer(RedisSerializer.string());
+		template.afterPropertiesSet();
+		return template;
+	}
 
-		return stringRedisTemplate;
+	/**
+	 * @see RedisKeyValueAdapter#initMessageListenerContainer()
+	 * @see <a href="https://docs.spring.io/spring-data/data-redis/docs/current/reference/html/#redis:reactive:pubsub:subscribe:containers">
+	 *          Message Listener Containers</a>
+	 */
+	private RedisMessageListenerContainer instanceListenerContainer(RedisConnectionFactory connectionFactory){
+		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+		container.setConnectionFactory(connectionFactory);
+
+		container.afterPropertiesSet();
+		container.start();
+		return container;
 	}
 
 	/**
@@ -132,22 +144,5 @@ public class RedisClientFactory extends AbstractRedisClient{
 		return config;
 	}
 
-	private Jackson2JsonRedisSerializer getJackson2JsonRedisSerializer() {
-		/*Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer(Object.class);
-		ObjectMapper om = new ObjectMapper();
-		om.setVisibility(PropertyAccessor.ALL, Visibility.ANY);
-		om.enableDefaultTyping(DefaultTyping.NON_FINAL);
-		jackson2JsonRedisSerializer.setObjectMapper(om);
-		return jackson2JsonRedisSerializer;*/
-		throw new UnsupportedOperationException();
-	}
 
-	private FastJsonRedisSerializer getFastJsonRedisSerializer() {
-		FastJsonRedisSerializer serializer = new FastJsonRedisSerializer(Object.class);
-		FastJsonConfig fastJsonConfig = new FastJsonConfig();
-		fastJsonConfig.setSerializerFeatures(new SerializerFeature[]{SerializerFeature.WriteClassName});
-		fastJsonConfig.setFeatures(new Feature[]{Feature.SupportAutoType});
-		serializer.setFastJsonConfig(fastJsonConfig);
-		return serializer;
-	}
 }

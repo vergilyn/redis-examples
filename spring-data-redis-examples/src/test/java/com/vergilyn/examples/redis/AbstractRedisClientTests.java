@@ -1,41 +1,121 @@
 package com.vergilyn.examples.redis;
 
-import com.vergilyn.examples.commons.redis.JedisClientFactory;
-import com.vergilyn.examples.commons.redis.RedisClientFactory;
+import java.util.Properties;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
-import org.springframework.data.redis.core.RedisTemplate;
+import javax.annotation.Resource;
+
+import com.google.common.collect.Lists;
+import com.vergilyn.examples.config.RedisConfiguration;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.data.redis.DataRedisTest;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.data.redis.connection.MessageListener;
+import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import redis.clients.jedis.Jedis;
+import org.springframework.data.redis.listener.KeyExpirationEventMessageListener;
+import org.springframework.data.redis.listener.KeyspaceEventMessageListener;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.data.redis.listener.Topic;
 
 /**
  * @author vergilyn
  * @since 2021-04-30
  */
+@Slf4j
+@DataRedisTest
+@ImportAutoConfiguration(RedisConfiguration.class)
 public abstract class AbstractRedisClientTests {
-	private static final JedisClientFactory jedisClientFactory = JedisClientFactory.getInstance();
-	private static final RedisClientFactory redisClientFactory = RedisClientFactory.getInstance();
+	@Autowired
+	private ApplicationContext applicationContext;
+	@Resource
+	protected StringRedisTemplate stringRedisTemplate;
+	@Resource
+	protected RedisMessageListenerContainer redisMessageListenerContainer;
 
-	protected final StringRedisTemplate _stringRedisTemplate = redisClientFactory.stringRedisTemplate();
-	protected final RedisTemplate<Object, Object> _redisTemplate = redisClientFactory.redisTemplate();
+	protected final RedisKyesapceListener redisKyesapceListener = new RedisKyesapceListener();
+
+	protected <T> T registerAndGetBean(Class<T> clazz){
+		final AnnotationConfigApplicationContext context = annotationConfigApplicationContext();
+		context.registerBean(clazz);
+
+		return context.getBean(clazz);
+	}
+
+	protected AnnotationConfigApplicationContext annotationConfigApplicationContext(){
+		return (AnnotationConfigApplicationContext) applicationContext;
+	}
 
 	/**
-	 * @see Jedis#close() 将connection返回 pool
-	 * @see Jedis#disconnect() 关闭socket
+	 *
+	 * @param timeout "<= 0" prevent exit.
+	 * @param unit timeout unit
 	 */
-	protected static Jedis jedis(){
-		return jedisClientFactory.jedis();
+	protected void awaitExit(long timeout, TimeUnit unit){
+		try {
+			final Semaphore semaphore = new Semaphore(0);
+			if (timeout > 0){
+				semaphore.tryAcquire(timeout, unit);
+			}else {
+				semaphore.acquire();
+			}
+		} catch (InterruptedException e) {
+		}
 	}
 
-	protected StringRedisTemplate stringRedisTemplate(){
-		return this._stringRedisTemplate;
-	}
+	/**
+	 * <pre>
+	 *   #  K     Keyspace events, published with __keyspace@<db>__ prefix.
+	 *   #  E     Keyevent events, published with __keyevent@<db>__ prefix.
+	 *   #  g     Generic commands (non-type specific) like DEL, EXPIRE, RENAME, ...
+	 *   #  $     String commands
+	 *   #  l     List commands
+	 *   #  s     Set commands
+	 *   #  h     Hash commands
+	 *   #  z     Sorted set commands
+	 *   #  x     Expired events (events generated every time a key expires)
+	 *   #  e     Evicted events (events generated when a key is evicted for maxmemory)
+	 *   #  A     Alias for g$lshzxe, so that the "AKE" string means all the events.
+	 * </pre>
+	 *
+	 * 当注册监听{@linkplain KeyExpirationEventMessageListener} or {@linkplain KeyspaceEventMessageListener}时，其内部会判断
+	 * 当前redis `notify-keyspace-events`是否为empty，如果empty则`config set notify-keyspace-events EA`。
+	 * SEE: {@linkplain KeyspaceEventMessageListener#init()}
+	 *
+	 */
+	protected class RedisKyesapceListener {
+		public void registerRedisKeyExpirationEventMessageListener(){
+			enableKeyspaceEvent("AEx");
+			registerAndGetBean(KeyExpirationEventMessageListener.class);
+		}
 
-	protected <K, V> RedisTemplate<K, V> redisTemplate(){
-		return (RedisTemplate<K, V>) _redisTemplate;
-	}
+		public void registerRedisListener(MessageListener listener, Topic topic){
+			redisMessageListenerContainer.addMessageListener(listener, Lists.newArrayList(topic));
+		}
 
-	protected void enableTransaction(){
-		redisClientFactory.enableTransaction();
-	}
+		/**
+		 *
+		 * @see KeyspaceEventMessageListener#init()
+		 */
+		private void enableKeyspaceEvent(String keyspaceNotificationsConfigParameter){
+			RedisConnection connection = redisMessageListenerContainer.getConnectionFactory().getConnection();
+			try {
+				String configKey = "notify-keyspace-events";
+				connection.setConfig(configKey, keyspaceNotificationsConfigParameter);
 
+				Properties config = connection.getConfig(configKey);
+
+				log.warn("redis command >>>> 'config set {}', expected: {}, actual: {}",
+						configKey, keyspaceNotificationsConfigParameter, config.getProperty(configKey));
+
+			}finally {
+				connection.close();
+			}
+		}
+	}
 }

@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: springboot-redis-examples
+  profiles:
+    active:
+      - redis
+
+logging:
+  level:
+    root: warn

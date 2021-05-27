@@ -48,19 +48,18 @@ class TransactionTests extends AbstractRedisClientTests {
 	 */
 	@BeforeEach
 	public void beforeEach(){
-		_stringRedisTemplate.setEnableTransactionSupport(true);
-		_redisTemplate.setEnableTransactionSupport(true);
+		stringRedisTemplate.setEnableTransactionSupport(true);
 	}
 
 	@AfterEach
 	public void afterEach(){
-		_stringRedisTemplate.delete(key);
+		stringRedisTemplate.delete(key);
 	}
 
 	@Test
 	public void tx() {
 		//execute a transaction
-		List<Object> txResults = _stringRedisTemplate.execute(new SessionCallback<List<Object>>() {
+		List<Object> txResults = stringRedisTemplate.execute(new SessionCallback<List<Object>>() {
 			public List<Object> execute(RedisOperations operations) throws DataAccessException {
 				operations.multi();
 				operations.opsForValue().increment(key, 2L);
