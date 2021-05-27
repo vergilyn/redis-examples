@@ -1,4 +1,4 @@
-package com.vergilyn.examples.entity;
+package com.vergilyn.examples.redis.usage.u0100.entity;
 
 import lombok.Data;
 import lombok.ToString;

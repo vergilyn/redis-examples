@@ -1,13 +1,13 @@
-package com.vergilyn.examples.cache;
+package com.vergilyn.examples.redis.usage.u0100.cache;
 
 import java.util.Optional;
 import java.util.function.ToLongBiFunction;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
-import com.vergilyn.examples.entity.Vote;
-import com.vergilyn.examples.entity.VoteItem;
-import com.vergilyn.examples.entity.VoteLog;
+import com.vergilyn.examples.redis.usage.u0100.entity.Vote;
+import com.vergilyn.examples.redis.usage.u0100.entity.VoteItem;
+import com.vergilyn.examples.redis.usage.u0100.entity.VoteLog;
 
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.util.Assert;
 
-import static com.vergilyn.examples.cache.CacheConstants.DEFAULT_INCR;
+import static com.vergilyn.examples.redis.usage.u0100.cache.CacheConstants.DEFAULT_INCR;
 
 /**
  * 常量命名：[key | field | value]_[true | false]_[string | hash | list | set | zset]。

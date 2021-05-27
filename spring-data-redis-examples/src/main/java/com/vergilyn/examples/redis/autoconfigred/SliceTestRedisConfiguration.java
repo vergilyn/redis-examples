@@ -1,4 +1,4 @@
-package com.vergilyn.examples.config;
+package com.vergilyn.examples.redis.autoconfigred;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -20,7 +20,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  * <a href="https://docs.spring.io/spring-boot/docs/2.1.2.RELEASE/reference/htmlsingle/#howto-use-jedis-instead-of-lettuce">91.4 Use Jedis Instead of Lettuce<a/>
  */
 @Configuration
-public class RedisConfiguration {
+public class SliceTestRedisConfiguration {
 
     /**
      * SDR默认采用的序列化策略有两种，一种是String的序列化策略，一种是JDK的序列化策略。

@@ -10,7 +10,7 @@ import org.testng.collections.Lists;
  * @author VergiLyn
  * @date 2019-06-24
  */
-public class EvalScriptTest extends AbstractRedisClientTests {
+class EvalScriptTest extends AbstractRedisClientTests {
 
     /**
      * <a href="https://docs.spring.io/spring-data/redis/docs/2.1.8.RELEASE/reference/html/#scripting">scripting</a>

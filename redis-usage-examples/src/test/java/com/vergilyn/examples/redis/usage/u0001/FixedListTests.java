@@ -3,7 +3,7 @@ package com.vergilyn.examples.redis.usage.u0001;
 import java.util.Arrays;
 import java.util.List;
 
-import com.vergilyn.examples.redis.usage.AbstractJedisClientTest;
+import com.vergilyn.examples.redis.usage.AbstractRedisClientTest;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,7 +13,7 @@ import org.testng.collections.Lists;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class FixedListTests extends AbstractJedisClientTest {
+public class FixedListTests extends AbstractRedisClientTest {
 	private final String key = "test-fixed-list";
 	private final int fixedSize = 5;
 	private final String[] lpushArgs = {"3", "4", "5", "6"};

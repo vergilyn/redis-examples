@@ -1,4 +1,4 @@
-package com.vergilyn.examples.cache;
+package com.vergilyn.examples.redis.usage.u0100.cache;
 
 /**
  * @author vergilyn

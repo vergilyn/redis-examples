@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Resource;
 
 import com.google.common.collect.Lists;
-import com.vergilyn.examples.config.RedisConfiguration;
+import com.vergilyn.examples.redis.autoconfigred.SliceTestRedisAutoConfiguration;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +15,7 @@ import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.data.redis.DataRedisTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.core.env.Environment;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -22,17 +23,30 @@ import org.springframework.data.redis.listener.KeyExpirationEventMessageListener
 import org.springframework.data.redis.listener.KeyspaceEventMessageListener;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.Topic;
+import org.springframework.test.context.ContextConfiguration;
 
 /**
+ * FIXME 2021-05-27 1)无法控制`org.springframework`的logger输出level。
+ *
+ * TODO 2021-05-27 无法理解`@DataRedisTest`到底怎么用！感觉下面这样写就是`@SpringBootTest`
+ *
  * @author vergilyn
  * @since 2021-04-30
+ *
+ * @see <a href="https://docs.spring.io/spring-boot/docs/2.2.11.RELEASE/reference/htmlsingle/#boot-features-testing-spring-boot-applications-testing-autoconfigured-redis-test">
+ *          Auto-configured Data Redis Tests</a>
  */
 @Slf4j
 @DataRedisTest
-@ImportAutoConfiguration(RedisConfiguration.class)
+//@ActiveProfiles(profiles = {"redis", "logging"})
+@ContextConfiguration(classes = SpringDataRedisApplication.class)
+@ImportAutoConfiguration(SliceTestRedisAutoConfiguration.class)
 public abstract class AbstractRedisClientTests {
 	@Autowired
 	private ApplicationContext applicationContext;
+	@Autowired
+	protected Environment environment;
+
 	@Resource
 	protected StringRedisTemplate stringRedisTemplate;
 	@Resource
@@ -41,7 +55,7 @@ public abstract class AbstractRedisClientTests {
 	protected final RedisKyesapceListener redisKyesapceListener = new RedisKyesapceListener();
 
 	protected <T> T registerAndGetBean(Class<T> clazz){
-		final AnnotationConfigApplicationContext context = annotationConfigApplicationContext();
+		AnnotationConfigApplicationContext context = annotationConfigApplicationContext();
 		context.registerBean(clazz);
 
 		return context.getBean(clazz);

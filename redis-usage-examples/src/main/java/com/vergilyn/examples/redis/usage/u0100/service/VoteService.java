@@ -1,8 +1,8 @@
-package com.vergilyn.examples.service;
+package com.vergilyn.examples.redis.usage.u0100.service;
 
 import java.util.Date;
 
-import com.vergilyn.examples.entity.Vote;
+import com.vergilyn.examples.redis.usage.u0100.entity.Vote;
 
 /**
  * @author VergiLyn

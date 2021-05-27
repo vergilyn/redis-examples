@@ -1,10 +1,10 @@
-package com.vergilyn.examples.service.impl;
+package com.vergilyn.examples.redis.usage.u0100.service.impl;
 
 import java.util.Date;
 
-import com.vergilyn.examples.cache.VoteCache;
-import com.vergilyn.examples.entity.Vote;
-import com.vergilyn.examples.service.VoteService;
+import com.vergilyn.examples.redis.usage.u0100.cache.VoteCache;
+import com.vergilyn.examples.redis.usage.u0100.entity.Vote;
+import com.vergilyn.examples.redis.usage.u0100.service.VoteService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 

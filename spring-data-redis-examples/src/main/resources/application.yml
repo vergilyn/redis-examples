@@ -4,7 +4,4 @@ spring:
   profiles:
     active:
       - redis
-
-logging:
-  level:
-    root: warn
+      - logging

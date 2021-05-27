@@ -5,7 +5,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.google.common.collect.Lists;
-import com.vergilyn.examples.redis.usage.AbstractJedisClientTest;
+import com.vergilyn.examples.redis.usage.AbstractRedisClientTest;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author vergilyn
  * @since 2021-04-01
  */
-public class RecentlyUsedTests extends AbstractJedisClientTest {
+public class RecentlyUsedTests extends AbstractRedisClientTest {
 	private final String key = "test-recently-used:409839163";
 	private final int fixedSize = 5;
 	private final int expiredSecond = 3000;
