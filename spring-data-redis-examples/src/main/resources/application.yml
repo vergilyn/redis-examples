@@ -1,7 +1,11 @@
 spring:
   application:
     name: springboot-redis-examples
+#  main:
+#    banner-mode: off
+  output:
+    ansi:
+      enabled: always
   profiles:
     active:
       - redis
-      - logging

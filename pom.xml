@@ -15,6 +15,7 @@
         <module>redis-usage-examples</module>
         <module>vergilyn-redis-commons</module>
         <module>jedis-examples</module>
+        <module>redis-commands-exampels</module>
     </modules>
 
     <properties>
@@ -44,6 +45,7 @@
         <apache-common-fileupload.version>1.4</apache-common-fileupload.version>
         <apache-common-httpclient.version>4.5.10</apache-common-httpclient.version>
         <apache-common-text.version>1.9</apache-common-text.version>
+        <apache-common-csv.version>1.8</apache-common-csv.version>
 
         <testng.version>7.3.0</testng.version>
         <mockito-core.version>3.7.7</mockito-core.version>
@@ -107,6 +109,11 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-pool2</artifactId>
                 <version>${apache-common-pool2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-csv</artifactId>
+                <version>${apache-common-csv.version}</version>
             </dependency>
 
             <dependency>
@@ -205,8 +212,29 @@
                     <include>**/*.lua</include>
                 </includes>
             </resource>
+            <resource>
+                <directory>src/test/java</directory>
+                <includes>
+                    <include>**/*.csv</include>
+                    <include>**/*.json</include>
+                </includes>
+            </resource>
         </resources>
+
         <plugins>
+          <!--  <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.0</version>
+            </plugin>-->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <configuration>
+                    <generateBackupPoms>false</generateBackupPoms>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

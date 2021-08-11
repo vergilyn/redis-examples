@@ -2,14 +2,16 @@ package com.vergilyn.examples.redis.script;
 
 import com.vergilyn.examples.redis.AbstractRedisClientTests;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.testng.collections.Lists;
 
 /**
- * @author VergiLyn
+ * @author vergilyn
  * @date 2019-06-24
  */
+@Slf4j
 class EvalScriptTest extends AbstractRedisClientTests {
 
     /**

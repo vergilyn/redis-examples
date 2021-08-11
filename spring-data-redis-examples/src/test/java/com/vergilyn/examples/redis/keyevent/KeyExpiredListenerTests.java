@@ -18,12 +18,13 @@ import org.springframework.data.redis.core.RedisKeyExpiredEvent;
 class KeyExpiredListenerTests extends AbstractRedisClientTests {
 
 	static final long KEY_EXPIRED = TimeUnit.SECONDS.toSeconds(2);
+	static final String KEY_VALUE = LocalTime.now().toString();
 	@BeforeEach
 	public void beforeEach(){
-		redisKyesapceListener.registerRedisKeyExpirationEventMessageListener();
+		redisKeyspaceListener.registerRedisKeyExpirationEventMessageListener();
 
 		stringRedisTemplate.boundValueOps("redis:key-expired")
-				.set(LocalTime.now().toString(), KEY_EXPIRED, TimeUnit.SECONDS);
+				.set(KEY_VALUE, KEY_EXPIRED, TimeUnit.SECONDS);
 	}
 
 	@SneakyThrows
@@ -34,15 +35,16 @@ class KeyExpiredListenerTests extends AbstractRedisClientTests {
 		awaitExit(KEY_EXPIRED * 2, TimeUnit.SECONDS);
 	}
 
-	public static class RedisKeyExpiredEventListener implements ApplicationListener<RedisKeyExpiredEvent>{
+	private static class RedisKeyExpiredEventListener implements ApplicationListener<RedisKeyExpiredEvent>{
 
 		@Override
 		public void onApplicationEvent(RedisKeyExpiredEvent event) {
-			System.out.print("RedisKeyExpiredEventListener >>>> ");
+			System.out.printf("[%s]RedisKeyExpiredEventListener >>>> ", LocalTime.now().toString());
 
 			// value = null!
-			System.out.printf("keyspace: %s, id: %s, value: %s\n",
-					event.getKeyspace(), new String(event.getId()), event.getValue());
+			System.out.printf("\n\tkeyspace: '%s', id: '%s', actual-value: '%s', expected-value: '%s'\n",
+					event.getKeyspace(), new String(event.getId()),
+					event.getValue(), KEY_VALUE);
 		}
 	}
 }

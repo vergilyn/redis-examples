@@ -26,8 +26,6 @@ import org.springframework.data.redis.listener.Topic;
 import org.springframework.test.context.ContextConfiguration;
 
 /**
- * FIXME 2021-05-27 1)无法控制`org.springframework`的logger输出level。
- *
  * TODO 2021-05-27 无法理解`@DataRedisTest`到底怎么用！感觉下面这样写就是`@SpringBootTest`
  *
  * @author vergilyn
@@ -38,7 +36,7 @@ import org.springframework.test.context.ContextConfiguration;
  */
 @Slf4j
 @DataRedisTest
-//@ActiveProfiles(profiles = {"redis", "logging"})
+//@ActiveProfiles(profiles = {"redis"})
 @ContextConfiguration(classes = SpringDataRedisApplication.class)
 @ImportAutoConfiguration(SliceTestRedisAutoConfiguration.class)
 public abstract class AbstractRedisClientTests {
@@ -52,7 +50,7 @@ public abstract class AbstractRedisClientTests {
 	@Resource
 	protected RedisMessageListenerContainer redisMessageListenerContainer;
 
-	protected final RedisKyesapceListener redisKyesapceListener = new RedisKyesapceListener();
+	protected final RedisKeyspaceListener redisKeyspaceListener = new RedisKeyspaceListener();
 
 	protected <T> T registerAndGetBean(Class<T> clazz){
 		AnnotationConfigApplicationContext context = annotationConfigApplicationContext();
@@ -102,7 +100,10 @@ public abstract class AbstractRedisClientTests {
 	 * SEE: {@linkplain KeyspaceEventMessageListener#init()}
 	 *
 	 */
-	protected class RedisKyesapceListener {
+	protected class RedisKeyspaceListener {
+		private RedisKeyspaceListener() {
+		}
+
 		public void registerRedisKeyExpirationEventMessageListener(){
 			enableKeyspaceEvent("AEx");
 			registerAndGetBean(KeyExpirationEventMessageListener.class);
