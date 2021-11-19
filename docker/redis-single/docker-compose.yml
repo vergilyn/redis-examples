@@ -1,19 +1,19 @@
 version: "3.9"
 services:
-  ## `redis.conf`
+  ## `redis-5.0.10.conf`
   # protected-mode no
   # bind ""
   # slowlog-log-slower-than 0(10000)
   # slowlog-max-len 250(128)
   redisSingle:
-    image: redis:5.0.10
-    container_name: redis-5x-single
+    image: redis:${REDIS_VERSION}
+    container_name: redis-6x-single
     restart: always
     ports:
-      - 56379:6379
+      - 16379:6379
     volumes:
-      - "D:/docker-volumes/redis-single/data/:/data/"
-      - "./redis.conf:/usr/local/etc/redis/redis.conf"
+      - "D:/docker-volumes/redis-${REDIS_VERSION}/data/:/data/"
+      - "./redis-${REDIS_VERSION}.conf:/usr/local/etc/redis/redis-${REDIS_VERSION}.conf"
     command:
       - "redis-server"
-      - "/usr/local/etc/redis/redis.conf"
+      - "/usr/local/etc/redis/redis-${REDIS_VERSION}.conf"

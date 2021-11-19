@@ -16,6 +16,7 @@
         <module>vergilyn-redis-commons</module>
         <module>jedis-examples</module>
         <module>redis-commands-exampels</module>
+        <module>redis-6x-client-cache-examples</module>
     </modules>
 
     <properties>
@@ -212,14 +213,17 @@
                     <include>**/*.lua</include>
                 </includes>
             </resource>
-            <resource>
+        </resources>
+        <testResources>
+            <testResource>
                 <directory>src/test/java</directory>
                 <includes>
                     <include>**/*.csv</include>
                     <include>**/*.json</include>
+                    <include>**/*.lua</include>
                 </includes>
-            </resource>
-        </resources>
+            </testResource>
+        </testResources>
 
         <plugins>
           <!--  <plugin>

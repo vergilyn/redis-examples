@@ -13,7 +13,7 @@ import redis.clients.jedis.JedisPoolConfig;
 public abstract class AbstractRedisClient {
 
 	public static final String DEFAULT_HOST = "127.0.0.1";
-	public static final int DEFAULT_PORT = 56379;
+	public static final int DEFAULT_PORT = 6379;
 
 	@SuppressWarnings("ALL")
 	protected final GenericObjectPoolConfig poolConfig(){

@@ -33,17 +33,20 @@ public class BitmapCommandsTests extends AbstractRedisClientTests {
 	@BeforeAll
 	private void beforeAll(){
 		stringRedisTemplate.delete(KEY);
-	}
 
-	@Test
-	@Order(1)
-	public void setBit(){
 		// redis中保存的字符串是"00111"，左边低位，右边高位。
 		stringRedisTemplate.opsForValue().setBit(KEY, 0, false);
 		stringRedisTemplate.opsForValue().setBit(KEY, 1, false);
 		stringRedisTemplate.opsForValue().setBit(KEY, 2, true);
 		stringRedisTemplate.opsForValue().setBit(KEY, 3, true);
 		stringRedisTemplate.opsForValue().setBit(KEY, 4, true);
+
+		stringRedisTemplate.opsForValue().setBit(KEY, 19, true);
+	}
+
+	@Test
+	@Order(1)
+	public void setBit(){
 	}
 
 	@Test
