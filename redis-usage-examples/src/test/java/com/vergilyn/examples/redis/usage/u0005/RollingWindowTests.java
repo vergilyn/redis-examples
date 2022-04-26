@@ -1,14 +1,8 @@
 package com.vergilyn.examples.redis.usage.u0005;
 
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
 import com.google.common.collect.Sets;
 import com.vergilyn.examples.commons.redis.RedisClientFactory;
 import com.vergilyn.examples.redis.usage.AbstractRedisClientTest;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -16,6 +10,11 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.data.redis.core.BoundZSetOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
+
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class RollingWindowTests extends AbstractRedisClientTest {
@@ -68,6 +67,7 @@ public class RollingWindowTests extends AbstractRedisClientTest {
 
 		Set<ZSetOperations.TypedTuple<Long>> members = boundZSetOps.rangeWithScores(0, -1);
 		if (CollectionUtils.isEmpty(members)){
+			// TODO 2022-04-25 添加
 			return true;
 		}
 
