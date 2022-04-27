@@ -3,33 +3,54 @@
 -- ARGV[2]：时间，单位秒。（也是key的失效时间）
 -- ARGV[3]: 限流次数
 -- ARGV[4]: 集合最大元素数量 （必须超过 ARGV[1]，默认是 `2 * ARGV[1]`）
+-- ARGV[5]: 随机数，避免 zset.member 重复。
+--
+-- FIXME 2022-04-26，
+--   1) 只能精确到 毫秒，且需要保证 唯一! (具体看传入的 `ARGV[1]` 的精度， 相应的要调整 `limitMillis`的计算规则)
+--   2) 此redis-lua依赖传入的 `currTimestampMillis`，如果服务器之间时间差过大，会导致此滑动窗口限制错误！
+--
 
-local currTimestamp = tonumber(ARGV[1]);
+local currTimestampMillis = tonumber(ARGV[1]);
 local limitSeconds = tonumber(ARGV[2]);
+local limitMillis = limitSeconds * 1000;
 local limitCount = tonumber(ARGV[3]);
-local maxMemberCount = tonumber(ARGV[4]);
-if (maxMemberCount < limitCount) then
-    maxMemberCount = 2 * limitCount;
-end
+local maxZsetEntries = tonumber(ARGV[4]);
+local randomStr = ARGV[5];
+-- JAVA代码中判断处理，不要依赖redis-lua中判断处理
+--if (maxZsetEntries < limitCount) then
+--    maxZsetEntries = 2 * limitCount;
+--end
 
 -- 防止服务器时间差，统一用redis的时间
 -- `TIME`: 返回内容包含两个元素，1) UNIX时间戳（单位：秒）2) 微秒
 -- local times = redis.call("TIME");
--- local currTimestamp = times[1] * 1000000 + times[2];
+-- local currTimestampMillis = times[1] * 1000000 + times[2];
 
--- XXX 2022-04-26 限制了 currTimestamp 和 limitSeconds 对应的单位！
-local minScore = currTimestamp - (limitSeconds * 1000);
--- `ZCOUNT key min max`: 指定分数范围的元素个数。
+-- XXX 2022-04-26 限制了 currTimestampMillis 和 limitSeconds 对应的单位！
+local minScore = currTimestampMillis - limitMillis;
+-- `ZCOUNT key min max`: 指定分数范围的元素个数。 (默认包括score值等于min或max)的成员
 local validCount = redis.call("ZCOUNT", KEYS[1], minScore, "+INF");
 
-local isLimit = true;
+local latelyUnlock;
 if (validCount < limitCount) then
     -- ZADD key [NX|XX] [CH] [INCR] score member [score member ...]
     -- `ERROR: Write commands not allowed after non deterministic commands`
     --   原因：redis-lua基于数据一致性考虑，要求脚本必须是纯函数的形式，也就是说对于一段Lua脚本给定相同的参数，写入Redis的数据也必须是相同的，对于随机性的写入Redis是拒绝的。
     --   所以：无法在 redis-lua 中调用 `redis.call("TIME")`，将此 time写入某个key！
-    redis.call("ZADD", KEYS[1], currTimestamp, currTimestamp);
-    isLimit = false;
+    --
+    -- 如果 `member = currTimestampMillis`需要保证其唯一，否则会造成错误！！！（或者传入一个 随机数或者唯一标识，避免此情况！例如 `member = currTimestampMillis,Random[0, 10000...]`）
+    redis.call("ZADD", KEYS[1], currTimestampMillis, currTimestampMillis .. randomStr);
+    latelyUnlock = -1;
+else
+    -- 最近一个解锁的member。必须是`[minScore, +INF]`，不能是 `[minScore, currTimestampMillis]`（当前时间戳 currTimestampMillis 比最小score都还小时，会得到nil）
+    -- ZRANGEBYSCORE key min max [WITHSCORES] [LIMIT offset count]
+    latelyUnlock = redis.call("ZRANGEBYSCORE", KEYS[1], minScore, "+INF", "WITHSCORES", "LIMIT", "0", "1")[2];
+    if latelyUnlock == nil then
+        -- 避免业务端多余判，返回最大值
+        latelyUnlock = currTimestampMillis + limitMillis;
+    else
+        latelyUnlock = latelyUnlock + limitMillis;
+    end
 end
 
 -- 删除失效的members。未做任何判断，会导致始终有一次`ZREMRANGEBYSCORE`
@@ -41,13 +62,16 @@ end
 --
 -- ZCARD: 时间复杂度：O(1)
 --
--- 取舍，避免`ZCOUNT`或每次都直接`ZREMRANGEBYSCORE`性能过低，所以通过`ZCARD`获取zset大小，如果超过`maxMemberCount`才调用`ZREMRANGEBYSCORE`
+-- 取舍，避免`ZCOUNT`或每次都直接`ZREMRANGEBYSCORE`性能过低，所以通过`ZCARD`获取zset大小，如果超过`maxZsetEntries`才调用`ZREMRANGEBYSCORE`
 local total = redis.call("ZCARD", KEYS[1]);
-if total >= maxMemberCount then
+if total >= maxZsetEntries then
     redis.call("ZREMRANGEBYSCORE", KEYS[1], "-INF", "(" .. minScore);
 end
 
 -- 设置key失效时间
-redis.call("EXPIRE", KEYS[1], limitSeconds);
+-- redis.call("EXPIRE", KEYS[1], limitSeconds);
 
-return isLimit;
+-- 返回值：
+--   具体的member值：触发限制，返回“最近的一个解除限制的 member”
+--   -1：未触发限制
+return latelyUnlock;
