@@ -17,7 +17,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class RollingWindowTests extends AbstractRedisClientTest {
+public class SlidingWindowTests extends AbstractRedisClientTest {
 	private static final int WINDOW_EXPIRED_MINUTES = 10;
 	private static final int LIMIT_MEMBER = 2;
 	private static final int LIMIT_TOTAL = 5;

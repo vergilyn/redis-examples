@@ -18,9 +18,9 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class RollingWindowLuaTests extends AbstractRedisClientTest {
+public class SlidlingWindowLuaTests extends AbstractRedisClientTest {
 
-	private final String script = LuaScriptReadUtils.getScript(this.getClass(), "redis-rolling-window.lua");
+	private final String script = LuaScriptReadUtils.getScript(this.getClass(), "redis-sliding-window.lua");
 
 	private static AtomicInteger index = new AtomicInteger(0);
 
