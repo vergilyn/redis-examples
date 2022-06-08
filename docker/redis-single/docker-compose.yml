@@ -5,12 +5,12 @@ services:
   # bind ""
   # slowlog-log-slower-than 0(10000)
   # slowlog-max-len 250(128)
-  redisSingle:
+  redis-single:
     image: redis:${REDIS_VERSION}
-    container_name: redis-6x-single
+    container_name: redis-single-5x
     restart: always
     ports:
-      - 16379:6379
+      - 56379:6379
     volumes:
       - "D:/docker-volumes/redis-${REDIS_VERSION}/data/:/data/"
       - "./redis-${REDIS_VERSION}.conf:/usr/local/etc/redis/redis-${REDIS_VERSION}.conf"
