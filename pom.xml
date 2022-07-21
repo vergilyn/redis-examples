@@ -17,6 +17,7 @@
         <module>jedis-examples</module>
         <module>redis-commands-exampels</module>
         <module>redis-6x-client-cache-examples</module>
+        <module>spring-data-redission-examples</module>
     </modules>
 
     <properties>

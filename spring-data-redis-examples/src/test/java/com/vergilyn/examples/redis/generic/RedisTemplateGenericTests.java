@@ -1,16 +1,14 @@
 package com.vergilyn.examples.redis.generic;
 
-import java.time.Duration;
-
-import javax.annotation.Resource;
-
 import com.alibaba.fastjson.JSON;
 import com.vergilyn.examples.redis.AbstractRedisClientTests;
-
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.redis.core.RedisTemplate;
+
+import javax.annotation.Resource;
+import java.time.Duration;
 
 /**
  *
@@ -29,7 +27,7 @@ class RedisTemplateGenericTests extends AbstractRedisClientTests {
 		String key = "generic:template:parent";
 		Parent value =  new Parent(1000);
 
-		parentRedisTemplate.opsForValue().set(key, value, Duration.ofSeconds(2L));
+		parentRedisTemplate.opsForValue().set(key, value, Duration.ofSeconds(2000L));
 
 		Parent parent = parentRedisTemplate.opsForValue().get(key);
 		System.out.printf("get parent: %s \n", JSON.toJSONString(parent));
