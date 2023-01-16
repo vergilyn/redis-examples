@@ -35,6 +35,7 @@ public class SlidlingWindowLuaTests extends AbstractRedisClientTest {
 	 *
 	 *   <b>解决办法：</b>使用同一台服务生成时间戳。
 	 *
+	 * @see org.redisson.RedissonRateLimiter#tryAcquireAsync(org.redisson.client.protocol.RedisCommand, Long)
 	 */
 	@SneakyThrows
 	@ParameterizedTest
