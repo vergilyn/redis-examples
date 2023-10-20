@@ -1,9 +1,9 @@
 package com.vergilyn.examples.commons.redis;
 
-import java.util.concurrent.TimeUnit;
-
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import redis.clients.jedis.JedisPoolConfig;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author vergilyn
@@ -13,7 +13,7 @@ import redis.clients.jedis.JedisPoolConfig;
 public abstract class AbstractRedisClient {
 
 	public static final String DEFAULT_HOST = "127.0.0.1";
-	public static final int DEFAULT_PORT = 6379;
+	public static final int DEFAULT_PORT = 56379;
 
 	@SuppressWarnings("ALL")
 	protected final GenericObjectPoolConfig poolConfig(){

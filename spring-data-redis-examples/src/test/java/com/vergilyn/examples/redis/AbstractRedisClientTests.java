@@ -1,14 +1,7 @@
 package com.vergilyn.examples.redis;
 
-import java.util.Properties;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
-
-import javax.annotation.Resource;
-
 import com.google.common.collect.Lists;
 import com.vergilyn.examples.redis.autoconfigred.SliceTestRedisAutoConfiguration;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
@@ -23,7 +16,13 @@ import org.springframework.data.redis.listener.KeyExpirationEventMessageListener
 import org.springframework.data.redis.listener.KeyspaceEventMessageListener;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.Topic;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+
+import javax.annotation.Resource;
+import java.util.Properties;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 /**
  * TODO 2021-05-27 无法理解`@DataRedisTest`到底怎么用！感觉下面这样写就是`@SpringBootTest`
@@ -36,7 +35,7 @@ import org.springframework.test.context.ContextConfiguration;
  */
 @Slf4j
 @DataRedisTest
-//@ActiveProfiles(profiles = {"redis"})
+@ActiveProfiles(profiles = {"redis"})
 @ContextConfiguration(classes = SpringDataRedisApplication.class)
 @ImportAutoConfiguration(SliceTestRedisAutoConfiguration.class)
 public abstract class AbstractRedisClientTests {

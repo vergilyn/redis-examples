@@ -5,11 +5,10 @@
 -- ARGV[4]: 集合最大元素数量 （必须超过 ARGV[1]，默认是 `2 * ARGV[3]`）
 -- ARGV[5]: 随机数，避免 `zset.member` 重复。
 --
--- FIXME 2022-04-26，
---   1) 只能精确到 毫秒，且需要保证 唯一! (具体看传入的 `ARGV[1]` 的精度， 相应的要调整 `intervalInMs`的计算规则)
---   2) 此redis-lua依赖传入的 `currTimestampMillis`，如果服务器之间时间差过大，会导致此滑动窗口限制错误！
---   3) 占用了过多的redis内存空间。特别是当“限流次数”越大时。（2023-01-17：相对redisson实现来说，此方式相对占用更少）
+-- 2023-01-17，在`redis-sliding-window.lua`的基础上，参考`redisson-rate.lua`进行调整。
 --
+-- 备注：
+--   1) 减少内存占用：不要直接保存距离`1970-01-01`的毫秒时间戳。可以将其换成例如距离 `2023-01-01 00:00:00.000` 的毫秒差。
 
 local currTimestampMillis = tonumber(ARGV[1]);
 local intervalInSecond = tonumber(ARGV[2]);
@@ -17,29 +16,15 @@ local intervalInMs = intervalInSecond * 1000;
 local maxCount = tonumber(ARGV[3]);
 local maxZsetEntries = tonumber(ARGV[4]);
 local randomStr = ARGV[5];
--- JAVA代码中判断处理，不要依赖redis-lua中判断处理
---if (maxZsetEntries < maxCount) then
---    maxZsetEntries = 2 * maxCount;
---end
 
--- 防止服务器时间差，统一用redis的时间。（reids-lua拒绝随机写，所以LUA中无法调用`redis.call("TIME")`。可以通过ARGV传入）
--- `TIME`: 返回内容包含两个元素，1) UNIX时间戳（单位：秒）2) 微秒
--- local times = redis.call("TIME");
--- local currTimestampMillis = times[1] * 1000000 + times[2];
-
--- XXX 2022-04-26 限制了 currTimestampMillis 和 intervalInSecond 对应的单位！
+-- FIXME 2023-01-17 限制了 currTimestampMillis 和 intervalInSecond 对应的单位！
+--   redis的key失效时间 最小时间单位是 毫秒，所以可以强制约束使用“毫秒”作为单位。
 local minScore = currTimestampMillis - intervalInMs;
 -- `ZCOUNT key min max`: 指定分数范围的元素个数。 (默认包括score值等于min或max)的成员
 local validCount = redis.call("ZCOUNT", KEYS[1], minScore, "+INF");
 
 local latelyUnlock;
 if (validCount < maxCount) then
-    -- ZADD key [NX|XX] [CH] [INCR] score member [score member ...]
-    -- `ERROR: Write commands not allowed after non deterministic commands`
-    --   原因：redis-lua基于数据一致性考虑，要求脚本必须是纯函数的形式，也就是说对于一段Lua脚本给定相同的参数，写入Redis的数据也必须是相同的，对于随机性的写入Redis是拒绝的。
-    --   所以：无法在 redis-lua 中调用 `redis.call("TIME")`，将此 time写入某个key！
-    --
-    -- 如果 `member = currTimestampMillis`需要保证其唯一，否则会造成错误！！！（或者传入一个 随机数或者唯一标识，避免此情况！例如 `member = currTimestampMillis,Random[0, 10000...]`）
     redis.call("ZADD", KEYS[1], currTimestampMillis, currTimestampMillis .. randomStr);
     latelyUnlock = -1;
 else
@@ -70,7 +55,8 @@ if total >= maxZsetEntries then
 end
 
 -- 设置key失效时间
--- redis.call("EXPIRE", KEYS[1], intervalInSecond);
+-- FIXME 每次获取令牌都设置失效时间是否会过于拖慢性能？
+redis.call("EXPIRE", KEYS[1], intervalInSecond);
 
 -- 返回值：
 --   具体的member值：触发限制，返回“最近的一个解除限制的 member”

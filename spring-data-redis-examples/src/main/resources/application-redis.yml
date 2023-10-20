@@ -1,7 +1,7 @@
 spring:
   redis:
     host: localhost
-    port: 56379
+    port: 26379
     database: 0
     timeout: 20s
 #    jedis:

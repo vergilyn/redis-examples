@@ -38,7 +38,7 @@ redis.call('del', KEYS[2], KEYS[3]);
 -- KEYS[5]: "{vergilyn:20221208}:permits:b6902619-4a73-4b85-8a37-38c8be53d1a0"
 --
 -- ARGV[1]: 600000      <=> key失效时间，毫秒
--- ARGV[2]: ""          <=> 参考 `PEXPIRE key milliseconds [NX | XX | GT | LT]`
+-- ARGV[2]: "NX"        <=> 参考 `PEXPIRE key milliseconds [NX | XX | GT | LT]`
 --
 -- `pexpire`: 设置成功，返回 1；key 不存在或设置失败，返回 0。
 local result = 0;
